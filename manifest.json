@@ -1,11 +1,10 @@
 {
-	"id": "sample-plugin",
-	"name": "Sample Plugin",
+	"id": "obsidian-image-row",
+	"name": "Image Row",
 	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
-	"description": "Demonstrates some of the capabilities of the Obsidian API.",
-	"author": "Obsidian",
-	"authorUrl": "https://obsidian.md",
-	"fundingUrl": "https://obsidian.md/pricing",
+	"description": "The images are displayed as thumbnails in a single row, where you can easily adjust the row height and view the full-size image by clicking on a thumbnail.",
+	"author": "tcyeee",
+	"authorUrl": "https://tcyeee.top",
 	"isDesktopOnly": false
 }
