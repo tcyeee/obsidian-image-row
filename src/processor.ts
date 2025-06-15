@@ -56,6 +56,10 @@ function createImage(option: SettingOptions, src: string): HTMLImageElement {
         overlay.style.justifyContent = "center";
         overlay.style.zIndex = "9999";
 
+        // 初始透明度为 0
+        overlay.style.opacity = "0";
+        overlay.style.transition = "opacity 0.3s ease";
+
         const largeImg = document.createElement("img");
         largeImg.src = src;
         largeImg.style.maxWidth = "90%";
@@ -66,6 +70,11 @@ function createImage(option: SettingOptions, src: string): HTMLImageElement {
 
         overlay.appendChild(largeImg);
         document.body.appendChild(overlay);
+
+        // 🚀 淡入动画
+        requestAnimationFrame(() => {
+            overlay.style.opacity = "1";
+        });
 
         overlay.addEventListener("click", (event) => {
             if (event.target === overlay) {
@@ -80,8 +89,13 @@ function createImage(option: SettingOptions, src: string): HTMLImageElement {
         };
         document.addEventListener("keydown", handleKeydown);
 
+        // ✅ 关闭并淡出
         function closePreview() {
-            overlay.remove();
+            overlay.style.opacity = "0";
+            // 等待动画结束后再移除元素
+            setTimeout(() => {
+                overlay.remove();
+            }, 300);
             document.removeEventListener("keydown", handleKeydown);
         }
     });
