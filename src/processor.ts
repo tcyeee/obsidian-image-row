@@ -31,13 +31,19 @@ export function addImageLayoutMarkdownProcessor(plugin: ImgRowPlugin) {
 function createImage(option: SettingOptions, src: string): HTMLImageElement {
     const img = document.createElement("img");
     img.src = src;
-    img.style.maxHeight = option.height + "px";
-    img.style.maxWidth = option.height + "px";
-    img.style.objectFit = "cover";
+    img.style.height = option.height + "px";
+    img.style.width = option.height + "px";
     img.style.borderRadius = option.radius + "px";
+    img.style.objectFit = "cover";
+    img.style.display = "block";
+    img.style.backgroundColor = "red"
     if (option.shadow) {
         img.style.boxShadow = "0 2px 4px rgba(0, 0, 0, 0.1)";
     }
+    if (option.border) {
+        img.style.border = "1px solid #ccc";
+    }
+
     return img;
 }
 
@@ -45,6 +51,7 @@ function createContainer(option: SettingOptions): HTMLDivElement {
     const container = document.createElement("div");
     container.style.display = "flex";
     container.style.flexWrap = "wrap";
+    container.style.padding = "8px";
     container.style.gap = option.gap + "px";
     return container
 }
@@ -72,6 +79,9 @@ function parseStyleOptions(source: string): SettingOptions {
                 break;
             case "shadow":
                 settings.shadow = value === "true";
+                break;
+            case "border":
+                settings.border = value === "true";
                 break;
         }
     }
