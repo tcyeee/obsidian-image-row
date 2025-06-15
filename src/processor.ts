@@ -36,7 +36,6 @@ function createImage(option: SettingOptions, src: string): HTMLImageElement {
     img.style.borderRadius = option.radius + "px";
     img.style.objectFit = "cover";
     img.style.display = "block";
-    img.style.backgroundColor = "red"
     if (option.shadow) {
         img.style.boxShadow = "0 2px 4px rgba(0, 0, 0, 0.1)";
     }
