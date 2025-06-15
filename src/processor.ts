@@ -65,15 +65,25 @@ function createImage(option: SettingOptions, src: string): HTMLImageElement {
         largeImg.style.border = option.border ? "1px solid #ccc" : "none";
 
         overlay.appendChild(largeImg);
+        document.body.appendChild(overlay);
 
-        // ✅ 点击遮罩层关闭大图
         overlay.addEventListener("click", (event) => {
             if (event.target === overlay) {
-                overlay.remove();
+                closePreview();
             }
         });
 
-        document.body.appendChild(overlay);
+        const handleKeydown = (event: KeyboardEvent) => {
+            if (event.key === "Escape") {
+                closePreview();
+            }
+        };
+        document.addEventListener("keydown", handleKeydown);
+
+        function closePreview() {
+            overlay.remove();
+            document.removeEventListener("keydown", handleKeydown);
+        }
     });
 
     return img;
