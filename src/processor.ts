@@ -31,8 +31,8 @@ export function addImageLayoutMarkdownProcessor(plugin: ImgRowPlugin) {
 function createImage(option: SettingOptions, src: string): HTMLImageElement {
     const img = document.createElement("img");
     img.src = src;
-    img.style.height = option.height + "px";
-    img.style.width = option.height + "px";
+    img.style.height = option.size + "px";
+    img.style.width = option.size + "px";
     img.style.borderRadius = option.radius + "px";
     img.style.objectFit = "cover";
     img.style.display = "block";
@@ -68,20 +68,29 @@ function parseStyleOptions(source: string): SettingOptions {
         if (!key || value === undefined) continue;
 
         switch (key) {
-            case "height":
-                settings.height = parseInt(value);
+            case "size":
+                const size = parseInt(value);
+                if (!isNaN(size) && size >= 50 && size <= 500) {
+                    settings.size = size;
+                }
                 break;
             case "gap":
-                settings.gap = parseInt(value);
+                const gap = parseInt(value);
+                if (!isNaN(gap) && gap >= 0 && gap <= 50) {
+                    settings.gap = gap;
+                }
                 break;
             case "radius":
-                settings.radius = parseInt(value);
+                const radius = parseInt(value);
+                if (!isNaN(radius) && radius >= 0 && radius <= 50) {
+                    settings.radius = radius;
+                }
                 break;
             case "shadow":
-                settings.shadow = value === "true";
+                settings.shadow = value.toLowerCase() === "true";
                 break;
             case "border":
-                settings.border = value === "true";
+                settings.border = value.toLowerCase() === "true";
                 break;
         }
     }

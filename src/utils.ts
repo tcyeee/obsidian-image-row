@@ -8,8 +8,8 @@ export function createErrorDiv(option: SettingOptions): HTMLDivElement {
     errorDiv.style.justifyContent = "center";
     errorDiv.style.alignItems = "center";
     errorDiv.style.gap = "8px";
-    errorDiv.style.width = option.height + "px";
-    errorDiv.style.height = option.height + "px";
+    errorDiv.style.width = option.size + "px";
+    errorDiv.style.height = option.size + "px";
     errorDiv.style.padding = "12px";
     errorDiv.style.border = "1px solid #ff6b6b";
     errorDiv.style.borderRadius = "6px";
