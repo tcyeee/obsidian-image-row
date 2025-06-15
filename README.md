@@ -1,6 +1,12 @@
+The images are displayed as thumbnails in a single row, where you can easily adjust the row height and view the full-size image by clicking on a thumbnail.
+
+![](assets/2.png)
+
 ### ✅ How to Use
+
 ![](assets/1.png)
-1. Create a code block with the language set to imgs.
+
+1. Create a code block with the language set to `imgs`.
 2. Inside the block, insert your image markdown
 
 ### ⭐ Optional Settings
