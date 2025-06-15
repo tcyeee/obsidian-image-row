@@ -43,6 +43,39 @@ function createImage(option: SettingOptions, src: string): HTMLImageElement {
         img.style.border = "1px solid #ccc";
     }
 
+    img.addEventListener("click", () => {
+        const overlay = document.createElement("div");
+        overlay.style.position = "fixed";
+        overlay.style.top = "0";
+        overlay.style.left = "0";
+        overlay.style.width = "100vw";
+        overlay.style.height = "100vh";
+        overlay.style.backgroundColor = "rgba(0, 0, 0, 0.8)";
+        overlay.style.display = "flex";
+        overlay.style.alignItems = "center";
+        overlay.style.justifyContent = "center";
+        overlay.style.zIndex = "9999";
+
+        const largeImg = document.createElement("img");
+        largeImg.src = src;
+        largeImg.style.maxWidth = "90%";
+        largeImg.style.maxHeight = "90%";
+        largeImg.style.borderRadius = option.radius + "px";
+        largeImg.style.boxShadow = "0 4px 16px rgba(0,0,0,0.3)";
+        largeImg.style.border = option.border ? "1px solid #ccc" : "none";
+
+        overlay.appendChild(largeImg);
+
+        // ✅ 点击遮罩层关闭大图
+        overlay.addEventListener("click", (event) => {
+            if (event.target === overlay) {
+                overlay.remove();
+            }
+        });
+
+        document.body.appendChild(overlay);
+    });
+
     return img;
 }
 
