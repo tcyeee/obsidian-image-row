@@ -34,6 +34,10 @@ function createImage(option: SettingOptions, src: string): HTMLImageElement {
     img.style.maxHeight = option.height + "px";
     img.style.maxWidth = option.height + "px";
     img.style.objectFit = "cover";
+    img.style.borderRadius = option.radius + "px";
+    if (option.shadow) {
+        img.style.boxShadow = "0 2px 4px rgba(0, 0, 0, 0.1)";
+    }
     return img;
 }
 
@@ -61,7 +65,7 @@ function parseStyleOptions(source: string): SettingOptions {
                 settings.height = parseInt(value);
                 break;
             case "gap":
-                settings.height = parseInt(value);
+                settings.gap = parseInt(value);
                 break;
             case "radius":
                 settings.radius = parseInt(value);
