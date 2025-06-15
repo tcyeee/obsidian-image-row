@@ -50,7 +50,7 @@ function createContainer(option: SettingOptions): HTMLDivElement {
     const container = document.createElement("div");
     container.style.display = "flex";
     container.style.flexWrap = "wrap";
-    container.style.padding = "8px";
+    container.style.padding = "8px 0";
     container.style.gap = option.gap + "px";
     return container
 }
