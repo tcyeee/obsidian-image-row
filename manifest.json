@@ -3,7 +3,7 @@
 	"name": "Image Row",
 	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
-	"description": "The images are displayed as thumbnails in a single row, where you can easily adjust the row height and view the full-size image by clicking on a thumbnail.",
+	"description": "The easiest way to display multiple images in a single row.",
 	"author": "tcyeee",
 	"authorUrl": "https://tcyeee.top",
 	"isDesktopOnly": false
