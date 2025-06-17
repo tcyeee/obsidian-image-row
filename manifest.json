@@ -1,7 +1,7 @@
 {
 	"id": "image-row",
 	"name": "Image Row",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"minAppVersion": "0.15.0",
 	"description": "The easiest way to display multiple images in a single row.",
 	"author": "tcyeee",

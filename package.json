@@ -1,7 +1,7 @@
 {
-	"name": "obsidian-sample-plugin",
-	"version": "1.0.0",
-	"description": "This is a sample plugin for Obsidian (https://obsidian.md)",
+	"name": "image-row",
+	"version": "1.0.1",
+	"description": "The easiest way to display multiple images in a single row.",
 	"main": "main.js",
 	"scripts": {
 		"dev": "node esbuild.config.mjs",
