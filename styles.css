@@ -1,8 +1,52 @@
-/*
+.plugin-image {
+    display: block;
+    object-fit: cover;
+    height: var(--plugin-image-size, 220px);
+    width: var(--plugin-image-size, 220px);
+    border-radius: var(--plugin-image-radius, 10px);
+  }
 
-This CSS file will be included with your plugin, and
-available in the app when your plugin is enabled.
+.plugin-image-shadow {
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
 
-If your plugin does not need CSS, delete this file.
+.plugin-image-border {
+	border: 1px solid #ccc;
+}
 
-*/
+.plugin-image-overlay {
+	position: fixed;
+	top: 0; 
+	left: 0;
+	width: 100vw;
+	height: 100vh;
+	background-color: rgba(0, 0, 0, 0.8);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 9999;
+	opacity: 0;
+	transition: opacity 0.3s ease;
+}
+
+.plugin-image-overlay-visible {
+	opacity: 1;
+}
+
+.plugin-image-large {
+	max-width: 90%;
+	max-height: 90%;
+	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+    border-radius: var(--plugin-image-radius, 10px);
+}
+
+.plugin-image-border-large {
+	border: 1px solid #ccc;
+}
+
+.plugin-image-container {
+	display: flex;
+	flex-wrap: wrap;
+	padding: 8px 0;
+    gap: var(--plugin-container-gap, 10px);
+}

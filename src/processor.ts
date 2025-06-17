@@ -31,71 +31,40 @@ export function addImageLayoutMarkdownProcessor(plugin: ImgRowPlugin) {
 function createImage(option: SettingOptions, src: string): HTMLImageElement {
     const img = document.createElement("img");
     img.src = src;
-    img.style.height = option.size + "px";
-    img.style.width = option.size + "px";
-    img.style.borderRadius = option.radius + "px";
-    img.style.objectFit = "cover";
-    img.style.display = "block";
-    if (option.shadow) {
-        img.style.boxShadow = "0 2px 4px rgba(0, 0, 0, 0.1)";
-    }
-    if (option.border) {
-        img.style.border = "1px solid #ccc";
-    }
+    img.classList.add("plugin-image");
+    img.style.setProperty("--plugin-image-size", `${option.size}px`);
+    img.style.setProperty("--plugin-image-radius", `${option.radius}px`);
+    if (option.shadow) img.classList.add("plugin-image-shadow")
+    if (option.border) img.classList.add("plugin-image-border");
 
     img.addEventListener("click", () => {
         const overlay = document.createElement("div");
-        overlay.style.position = "fixed";
-        overlay.style.top = "0";
-        overlay.style.left = "0";
-        overlay.style.width = "100vw";
-        overlay.style.height = "100vh";
-        overlay.style.backgroundColor = "rgba(0, 0, 0, 0.8)";
-        overlay.style.display = "flex";
-        overlay.style.alignItems = "center";
-        overlay.style.justifyContent = "center";
-        overlay.style.zIndex = "9999";
-
-        // 初始透明度为 0
-        overlay.style.opacity = "0";
-        overlay.style.transition = "opacity 0.3s ease";
+        overlay.classList.add("plugin-image-overlay");
 
         const largeImg = document.createElement("img");
         largeImg.src = src;
-        largeImg.style.maxWidth = "90%";
-        largeImg.style.maxHeight = "90%";
-        largeImg.style.borderRadius = option.radius + "px";
-        largeImg.style.boxShadow = "0 4px 16px rgba(0,0,0,0.3)";
-        largeImg.style.border = option.border ? "1px solid #ccc" : "none";
+        largeImg.classList.add("plugin-image-large");
+        if (option.border) largeImg.classList.add("plugin-image-border-large");
 
         overlay.appendChild(largeImg);
         document.body.appendChild(overlay);
 
-        // 🚀 淡入动画
         requestAnimationFrame(() => {
-            overlay.style.opacity = "1";
+            overlay.classList.add("plugin-image-overlay-visible");
         });
 
         overlay.addEventListener("click", (event) => {
-            if (event.target === overlay) {
-                closePreview();
-            }
+            if (event.target === overlay) closePreview();
         });
 
         const handleKeydown = (event: KeyboardEvent) => {
-            if (event.key === "Escape") {
-                closePreview();
-            }
+            if (event.key === "Escape") closePreview();
         };
         document.addEventListener("keydown", handleKeydown);
 
-        // ✅ 关闭并淡出
         function closePreview() {
-            overlay.style.opacity = "0";
-            // 等待动画结束后再移除元素
-            setTimeout(() => {
-                overlay.remove();
-            }, 300);
+            overlay.classList.remove("plugin-image-overlay-visible");
+            setTimeout(() => { overlay.remove() }, 300);
             document.removeEventListener("keydown", handleKeydown);
         }
     });
@@ -105,10 +74,8 @@ function createImage(option: SettingOptions, src: string): HTMLImageElement {
 
 function createContainer(option: SettingOptions): HTMLDivElement {
     const container = document.createElement("div");
-    container.style.display = "flex";
-    container.style.flexWrap = "wrap";
-    container.style.padding = "8px 0";
-    container.style.gap = option.gap + "px";
+    container.classList.add("plugin-image-container");
+    container.style.setProperty("--plugin-container-gap", `${option.gap}px`);
     return container
 }
 
