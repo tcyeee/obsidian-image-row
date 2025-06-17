@@ -1,6 +1,6 @@
 {
 	"name": "image-row",
-	"version": "1.0.1",
+	"version": "1.0.0",
 	"description": "The easiest way to display multiple images in a single row.",
 	"main": "main.js",
 	"scripts": {
