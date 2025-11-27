@@ -147,7 +147,7 @@ function createContainer(
     container.classList.add("plugin-image-container");
     container.style.setProperty("--plugin-container-gap", `${option.gap}px`);
 
-    // setting按钮
+    // setting按钮（仅在阅读模式下可见）
     const settingBtn = document.createElement("button");
     settingBtn.className = "plugin-image-setting-btn icon--settings";
     settingBtn.style.display = "none";
@@ -233,26 +233,36 @@ function createContainer(
         });
     });
 
-    // setting按钮点击显示/隐藏面板
-    settingBtn.onclick = (e) => {
-        e.stopPropagation();
-        panel.style.display = panel.style.display === "none" ? "block" : "none";
-    };
+    // 仅在阅读模式下启用面板入口
+    const view = plugin.app.workspace.getActiveViewOfType(MarkdownView);
+    const mode =
+        (view as any)?.getMode?.() ??
+        (view as any)?.currentMode?.type ??
+        "preview";
+    const isPreviewMode = mode === "preview";
 
-    // 点击面板外自动关闭
-    document.addEventListener("click", (e: any) => {
-        if (!container.contains(e.target)) {
+    if (isPreviewMode) {
+        // setting按钮点击显示/隐藏面板
+        settingBtn.onclick = (e) => {
+            e.stopPropagation();
+            panel.style.display = panel.style.display === "none" ? "block" : "none";
+        };
+
+        // 点击面板外自动关闭
+        document.addEventListener("click", (e: any) => {
+            if (!container.contains(e.target)) {
+                panel.style.display = "none";
+            }
+        });
+
+        container.addEventListener("mouseenter", () => {
+            settingBtn.style.display = "flex";
+        });
+        container.addEventListener("mouseleave", () => {
+            settingBtn.style.display = "none";
             panel.style.display = "none";
-        }
-    });
-
-    container.addEventListener("mouseenter", () => {
-        settingBtn.style.display = "flex";
-    });
-    container.addEventListener("mouseleave", () => {
-        settingBtn.style.display = "none";
-        panel.style.display = "none";
-    });
+        });
+    }
 
     return container;
 }
