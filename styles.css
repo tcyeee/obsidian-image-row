@@ -27,7 +27,38 @@
 	z-index: 9999;
 	opacity: 0;
 	transition: opacity 0.3s ease;
+	/* 新增：让内部按钮绝对定位参照本身容器 */
+	position: fixed;
 }
+.plugin-image-nav-btn {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.4);
+    color: #333;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10001;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.16);
+    transition: background 0.15s, color 0.15s;
+}
+.plugin-image-nav-btn:active {
+    background: rgba(255,255,255,0.7);
+}
+.plugin-image-nav-btn:disabled {
+    background: rgba(180,180,180,0.5);
+    color: #aaa;
+    cursor: not-allowed;
+}
+.plugin-image-nav-btn-prev { left:32px; }
+.plugin-image-nav-btn-next { right:32px; }
 
 .plugin-image-overlay-visible {
 	opacity: 1;

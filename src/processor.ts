@@ -3,12 +3,12 @@ import { createErrorDiv } from "src/utils";
 import { SettingOptions as SettingOptions } from "./domain";
 
 export function addImageLayoutMarkdownProcessor(plugin: ImgRowPlugin) {
-
     plugin.registerMarkdownCodeBlockProcessor("imgs", (source, el, ctx) => {
         const option = parseStyleOptions(source)
         const container = createContainer(option)
 
         const lines = source.split("\n");
+        const srcList: string[] = [];
         for (const line of lines) {
             const match = /!\[.*?\]\((.*?)\)/.exec(line.trim());
             if (match) {
@@ -18,17 +18,20 @@ export function addImageLayoutMarkdownProcessor(plugin: ImgRowPlugin) {
                     ?? this.app.vault.getFiles().find((f: any) => f.path.endsWith(decodedPath));
                 if (file) {
                     const src = this.app.vault.getResourcePath(file);
-                    container.appendChild(createImage(option, src));
+                    srcList.push(src);
                 } else {
                     container.appendChild(createErrorDiv(option));
                 }
             }
         }
+        srcList.forEach((src, idx) => {
+            container.appendChild(createImage(option, src, srcList, idx));
+        });
         el.appendChild(container);
     });
 }
 
-function createImage(option: SettingOptions, src: string): HTMLImageElement {
+function createImage(option: SettingOptions, src: string, srcList?: string[], idx?: number): HTMLImageElement {
     const img = document.createElement("img");
     img.src = src;
     img.classList.add("plugin-image");
@@ -38,15 +41,22 @@ function createImage(option: SettingOptions, src: string): HTMLImageElement {
     if (option.border) img.classList.add("plugin-image-border");
 
     img.addEventListener("click", () => {
+        let curIdx = idx || 0;
         const overlay = document.createElement("div");
         overlay.classList.add("plugin-image-overlay");
 
         const largeImg = document.createElement("img");
-        largeImg.src = src;
+        largeImg.src = srcList?.[curIdx] || src;
         largeImg.classList.add("plugin-image-large");
         if (option.border) largeImg.classList.add("plugin-image-border-large");
 
-        // ========== 放大缩小逻辑 begin ==========
+        const prevBtn = document.createElement("button");
+        prevBtn.textContent = "←";
+        prevBtn.className = "plugin-image-nav-btn plugin-image-nav-btn-prev";
+        const nextBtn = document.createElement("button");
+        nextBtn.textContent = "→";
+        nextBtn.className = "plugin-image-nav-btn plugin-image-nav-btn-next";
+
         let scale = 1;
         const minScale = 1.0;
         const maxScale = 2.0;
@@ -61,7 +71,31 @@ function createImage(option: SettingOptions, src: string): HTMLImageElement {
             }
             largeImg.style.transform = `scale(${scale})`;
         });
-        // ========== 放大缩小逻辑 end ==========
+        // 切换图片函数
+        const switchTo = (newIdx: number) => {
+            if (!srcList) return;
+            curIdx = newIdx;
+            largeImg.src = srcList[curIdx];
+            scale = 1;
+            largeImg.style.transform = "scale(1)";
+            updateBtnState();
+        };
+        prevBtn.onclick = () => {
+            if (srcList && curIdx > 0) switchTo(curIdx - 1);
+        };
+        nextBtn.onclick = () => {
+            if (srcList && curIdx < srcList.length - 1) switchTo(curIdx + 1);
+        };
+        function updateBtnState() {
+            if (!srcList) return;
+            prevBtn.disabled = curIdx === 0;
+            nextBtn.disabled = curIdx === srcList.length - 1;
+        }
+        if (srcList && srcList.length > 1) {
+            overlay.appendChild(prevBtn);
+            overlay.appendChild(nextBtn);
+        }
+        updateBtnState();
 
         overlay.appendChild(largeImg);
         document.body.appendChild(overlay);
@@ -69,23 +103,28 @@ function createImage(option: SettingOptions, src: string): HTMLImageElement {
         requestAnimationFrame(() => {
             overlay.classList.add("plugin-image-overlay-visible");
         });
-
         overlay.addEventListener("click", (event) => {
             if (event.target === overlay) closePreview();
         });
-
+        // 支持左右方向键切换
         const handleKeydown = (event: KeyboardEvent) => {
             if (event.key === "Escape") closePreview();
+            if (srcList && srcList.length > 1 && overlay.parentNode) {
+                if (event.key === "ArrowLeft" && curIdx > 0) {
+                    switchTo(curIdx - 1);
+                }
+                if (event.key === "ArrowRight" && curIdx < srcList.length - 1) {
+                    switchTo(curIdx + 1);
+                }
+            }
         };
         document.addEventListener("keydown", handleKeydown);
-
         function closePreview() {
             overlay.classList.remove("plugin-image-overlay-visible");
             setTimeout(() => { overlay.remove() }, 300);
             document.removeEventListener("keydown", handleKeydown);
         }
     });
-
     return img;
 }
 
