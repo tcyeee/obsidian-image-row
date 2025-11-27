@@ -46,6 +46,23 @@ function createImage(option: SettingOptions, src: string): HTMLImageElement {
         largeImg.classList.add("plugin-image-large");
         if (option.border) largeImg.classList.add("plugin-image-border-large");
 
+        // ========== 放大缩小逻辑 begin ==========
+        let scale = 1;
+        const minScale = 1.0;
+        const maxScale = 2.0;
+        largeImg.style.transition = "transform 0.2s";
+        largeImg.addEventListener("wheel", e => {
+            e.preventDefault();
+            const delta = e.deltaY;
+            if (delta < 0) {
+                scale = Math.min(maxScale, scale + 0.1);
+            } else {
+                scale = Math.max(minScale, scale - 0.1);
+            }
+            largeImg.style.transform = `scale(${scale})`;
+        });
+        // ========== 放大缩小逻辑 end ==========
+
         overlay.appendChild(largeImg);
         document.body.appendChild(overlay);
 
