@@ -192,7 +192,7 @@ function createContainer(
     );
     // 根据当前 size 推断 S / M / L
     const currentSize = option.size;
-    const pickSizeLabel = currentSize <= 180 ? "small" : currentSize <= 260 ? "medium" : "large";
+    const pickSizeLabel = currentSize <= 90 ? "small" : currentSize <= 150 ? "medium" : "large";
     sizeRadios.forEach((radio) => {
         if (radio.dataset.size === pickSizeLabel) {
             radio.checked = true;
@@ -216,13 +216,16 @@ function createContainer(
             // 给 S / M / L 映射一个具体像素值
             switch (radio.dataset.size) {
                 case "small":
-                    option.size = 160;
+                    option.size = 90;
+                    option.gap = 5;
                     break;
                 case "medium":
-                    option.size = 220;
+                    option.size = 150;
+                    option.gap = 8;
                     break;
                 case "large":
-                    option.size = 280;
+                    option.size = 220;
+                    option.gap = 10;
                     break;
             }
             applySettingsToContainer(container, option);
