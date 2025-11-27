@@ -135,7 +135,7 @@ function createContainer(option: SettingOptions): HTMLDivElement {
 
     // 新增：左上角setting按钮
     const settingBtn = document.createElement("button");
-    settingBtn.textContent = "⚙ setting";
+    settingBtn.textContent = "setting";
     settingBtn.className = "plugin-image-setting-btn";
     settingBtn.style.display = "none";
     container.appendChild(settingBtn);
