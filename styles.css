@@ -93,7 +93,7 @@
 }
 .plugin-image-setting-btn:hover {
   background: rgba(255,255,255,1);
-color: gray;
+  color: rgba(128, 128, 128, 0.492);
 }
 .plugin-image-container {
 	display: flex;
@@ -101,4 +101,55 @@ color: gray;
 	padding: 8px 0;
     gap: var(--plugin-container-gap, 10px);
     position: relative; /* 保证setting按钮绝对定位参照容器 */
+}
+
+/* setting操作面板，仅样式 */
+.plugin-image-setting-panel {
+  position: absolute;
+  top: 44px;
+  right: 12px;
+  min-width: 160px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.13);
+  padding: 17px 26px 16px 18px;
+  z-index: 110;
+  display: none;
+  font-size: 15px;
+  color: #464646;
+  flex-direction: column;
+  gap: 18px;
+}
+.plugin-image-setting-checkbox {
+  user-select: none;
+  margin-bottom: 8px;
+  font-size: 15px;
+  color: #575757;
+  display: flex;
+  align-items: center;
+}
+.plugin-image-setting-panel input[type="checkbox"] {
+  margin-right: 9px;
+  accent-color: #888;
+  transform: scale(1.1);
+}
+.plugin-image-setting-size-group {
+  margin-top: 5px;
+  display: flex;
+  gap: 13px;
+  align-items: center;
+}
+.plugin-image-setting-size-radio {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  gap: 4px;
+  font-size: 14.5px;
+}
+.plugin-image-setting-size-radio input[type="radio"] {
+  accent-color: #5677c0;
+  margin-right: 2px;
+}
+.plugin-image-setting-size-radio:hover {
+  color: #2350a2;
 }

@@ -133,21 +133,56 @@ function createContainer(option: SettingOptions): HTMLDivElement {
     container.classList.add("plugin-image-container");
     container.style.setProperty("--plugin-container-gap", `${option.gap}px`);
 
-    // 新增：左上角setting按钮
+    // setting按钮
     const settingBtn = document.createElement("button");
     settingBtn.textContent = "setting";
     settingBtn.className = "plugin-image-setting-btn";
     settingBtn.style.display = "none";
     container.appendChild(settingBtn);
 
+    // setting面板
+    const panel = document.createElement("div");
+    panel.className = "plugin-image-setting-panel";
+    panel.style.display = "none";
+    panel.innerHTML = `
+      <label class="plugin-image-setting-checkbox"><input type="checkbox"/> border</label>
+      <label class="plugin-image-setting-checkbox"><input type="checkbox"/> shadow</label>
+      <div class="plugin-image-setting-size-group">
+        <label class="plugin-image-setting-size-radio">
+          <input type="radio" name="imgs-size" /> S
+        </label>
+        <label class="plugin-image-setting-size-radio">
+          <input type="radio" name="imgs-size" /> M
+        </label>
+        <label class="plugin-image-setting-size-radio">
+          <input type="radio" name="imgs-size" /> L
+        </label>
+      </div>
+    `;
+    container.appendChild(panel);
+
+    // setting按钮点击显示/隐藏面板
+    settingBtn.onclick = (e) => {
+        e.stopPropagation();
+        panel.style.display = panel.style.display === "none" ? "block" : "none";
+    };
+
+    // 点击面板外自动关闭
+    document.addEventListener('click', (e: any) => {
+        if (!container.contains(e.target)) {
+            panel.style.display = "none";
+        }
+    });
+
     container.addEventListener("mouseenter", () => {
         settingBtn.style.display = "flex";
     });
     container.addEventListener("mouseleave", () => {
         settingBtn.style.display = "none";
+        panel.style.display = "none";
     });
 
-    return container
+    return container;
 }
 
 function parseStyleOptions(source: string): SettingOptions {
