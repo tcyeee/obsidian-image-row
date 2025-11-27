@@ -59,7 +59,7 @@ function createImage(option: SettingOptions, src: string, srcList?: string[], id
 
         let scale = 1;
         const minScale = 1.0;
-        const maxScale = 2.0;
+        const maxScale = 2.5;
         largeImg.style.transition = "transform 0.2s";
         largeImg.addEventListener("wheel", e => {
             e.preventDefault();
