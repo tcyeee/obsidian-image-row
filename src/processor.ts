@@ -135,8 +135,8 @@ function createContainer(option: SettingOptions): HTMLDivElement {
 
     // setting按钮
     const settingBtn = document.createElement("button");
-    settingBtn.textContent = "setting";
-    settingBtn.className = "plugin-image-setting-btn";
+    // settingBtn.textContent = "setting";
+    settingBtn.className = "plugin-image-setting-btn icon--settings";
     settingBtn.style.display = "none";
     container.appendChild(settingBtn);
 
