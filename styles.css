@@ -74,9 +74,32 @@
 	border: 1px solid #ccc;
 }
 
+.plugin-image-setting-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.85);
+  color: #333;
+  border: none;
+  font-size: 22px;
+  box-shadow: 0 1px 5px rgba(0,0,0,0.07);
+  cursor: pointer;
+  display: none; /* 默认隐藏，由js控制 */
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  transition: background 0.15s;
+}
+.plugin-image-setting-btn:hover {
+  background: rgba(255,255,255,1);
+}
 .plugin-image-container {
 	display: flex;
 	flex-wrap: wrap;
 	padding: 8px 0;
     gap: var(--plugin-container-gap, 10px);
+    position: relative; /* 保证setting按钮绝对定位参照容器 */
 }

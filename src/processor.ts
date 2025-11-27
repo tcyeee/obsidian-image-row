@@ -132,6 +132,21 @@ function createContainer(option: SettingOptions): HTMLDivElement {
     const container = document.createElement("div");
     container.classList.add("plugin-image-container");
     container.style.setProperty("--plugin-container-gap", `${option.gap}px`);
+
+    // 新增：左上角setting按钮
+    const settingBtn = document.createElement("button");
+    settingBtn.textContent = "⚙ setting";
+    settingBtn.className = "plugin-image-setting-btn";
+    settingBtn.style.display = "none";
+    container.appendChild(settingBtn);
+
+    container.addEventListener("mouseenter", () => {
+        settingBtn.style.display = "flex";
+    });
+    container.addEventListener("mouseleave", () => {
+        settingBtn.style.display = "none";
+    });
+
     return container
 }
 
