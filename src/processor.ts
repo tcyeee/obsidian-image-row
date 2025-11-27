@@ -1,11 +1,12 @@
 import ImgRowPlugin from "main";
 import { createErrorDiv } from "src/utils";
 import { SettingOptions as SettingOptions } from "./domain";
+import { MarkdownView, MarkdownPostProcessorContext } from "obsidian";
 
 export function addImageLayoutMarkdownProcessor(plugin: ImgRowPlugin) {
     plugin.registerMarkdownCodeBlockProcessor("imgs", (source, el, ctx) => {
-        const option = parseStyleOptions(source)
-        const container = createContainer(option)
+        const option = parseStyleOptions(source);
+        const container = createContainer(option, plugin, ctx as MarkdownPostProcessorContext, el);
 
         const lines = source.split("\n");
         const srcList: string[] = [];
@@ -14,10 +15,10 @@ export function addImageLayoutMarkdownProcessor(plugin: ImgRowPlugin) {
             if (match) {
                 const linkPath = match[1];
                 const decodedPath = decodeURIComponent(linkPath);
-                let file = this.app.metadataCache.getFirstLinkpathDest(decodedPath, ctx.sourcePath)
-                    ?? this.app.vault.getFiles().find((f: any) => f.path.endsWith(decodedPath));
+                let file = plugin.app.metadataCache.getFirstLinkpathDest(decodedPath, ctx.sourcePath)
+                    ?? plugin.app.vault.getFiles().find((f: any) => f.path.endsWith(decodedPath));
                 if (file) {
-                    const src = this.app.vault.getResourcePath(file);
+                    const src = plugin.app.vault.getResourcePath(file);
                     srcList.push(src);
                 } else {
                     container.appendChild(createErrorDiv(option));
@@ -27,6 +28,10 @@ export function addImageLayoutMarkdownProcessor(plugin: ImgRowPlugin) {
         srcList.forEach((src, idx) => {
             container.appendChild(createImage(option, src, srcList, idx));
         });
+
+        // 将当前配置应用到容器中的所有图片（支持后续面板动态更新）
+        applySettingsToContainer(container, option);
+
         el.appendChild(container);
     });
 }
@@ -128,38 +133,102 @@ function createImage(option: SettingOptions, src: string, srcList?: string[], id
     return img;
 }
 
-function createContainer(option: SettingOptions): HTMLDivElement {
+/**
+ * 创建图片容器及右上角的设置面板。
+ * 面板中的控件会和传入的 SettingOptions 进行绑定，并在修改时写回到 Markdown 源码。
+ */
+function createContainer(
+    option: SettingOptions,
+    plugin: ImgRowPlugin,
+    ctx: MarkdownPostProcessorContext,
+    el: HTMLElement,
+): HTMLDivElement {
     const container = document.createElement("div");
     container.classList.add("plugin-image-container");
     container.style.setProperty("--plugin-container-gap", `${option.gap}px`);
 
     // setting按钮
     const settingBtn = document.createElement("button");
-    // settingBtn.textContent = "setting";
     settingBtn.className = "plugin-image-setting-btn icon--settings";
     settingBtn.style.display = "none";
     container.appendChild(settingBtn);
+
+    // 为每个容器生成独立的 radio 分组名，避免多个代码块之间互相影响
+    const sizeGroupName = `imgs-size-${Math.random().toString(36).slice(2, 8)}`;
 
     // setting面板
     const panel = document.createElement("div");
     panel.className = "plugin-image-setting-panel";
     panel.style.display = "none";
     panel.innerHTML = `
-      <label class="plugin-image-setting-checkbox"><input type="checkbox"/> border</label>
-      <label class="plugin-image-setting-checkbox"><input type="checkbox"/> shadow</label>
+      <label class="plugin-image-setting-checkbox">
+        <input type="checkbox" data-setting="border"/> border
+      </label>
+      <label class="plugin-image-setting-checkbox">
+        <input type="checkbox" data-setting="shadow"/> shadow
+      </label>
       <div class="plugin-image-setting-size-group">
         <label class="plugin-image-setting-size-radio">
-          <input type="radio" name="imgs-size" /> S
+          <input type="radio" data-size="small" name="${sizeGroupName}" /> S
         </label>
         <label class="plugin-image-setting-size-radio">
-          <input type="radio" name="imgs-size" /> M
+          <input type="radio" data-size="medium" name="${sizeGroupName}" /> M
         </label>
         <label class="plugin-image-setting-size-radio">
-          <input type="radio" name="imgs-size" /> L
+          <input type="radio" data-size="large" name="${sizeGroupName}" /> L
         </label>
       </div>
     `;
     container.appendChild(panel);
+
+    // 根据当前的配置初始化面板勾选状态
+    const borderCheckbox = panel.querySelector<HTMLInputElement>('input[data-setting="border"]');
+    const shadowCheckbox = panel.querySelector<HTMLInputElement>('input[data-setting="shadow"]');
+    if (borderCheckbox) borderCheckbox.checked = option.border;
+    if (shadowCheckbox) shadowCheckbox.checked = option.shadow;
+
+    const sizeRadios = Array.from(
+        panel.querySelectorAll<HTMLInputElement>('input[type="radio"][name="' + sizeGroupName + '"]')
+    );
+    // 根据当前 size 推断 S / M / L
+    const currentSize = option.size;
+    const pickSizeLabel = currentSize <= 180 ? "small" : currentSize <= 260 ? "medium" : "large";
+    sizeRadios.forEach((radio) => {
+        if (radio.dataset.size === pickSizeLabel) {
+            radio.checked = true;
+        }
+    });
+
+    // 绑定事件：勾选框/单选按钮改变时，实时更新配置并作用到当前容器
+    borderCheckbox?.addEventListener("change", () => {
+        option.border = !!borderCheckbox.checked;
+        applySettingsToContainer(container, option);
+        persistOptionsToSource(option, plugin, ctx, el);
+    });
+    shadowCheckbox?.addEventListener("change", () => {
+        option.shadow = !!shadowCheckbox.checked;
+        applySettingsToContainer(container, option);
+        persistOptionsToSource(option, plugin, ctx, el);
+    });
+    sizeRadios.forEach((radio) => {
+        radio.addEventListener("change", () => {
+            if (!radio.checked) return;
+            // 给 S / M / L 映射一个具体像素值
+            switch (radio.dataset.size) {
+                case "small":
+                    option.size = 160;
+                    break;
+                case "medium":
+                    option.size = 220;
+                    break;
+                case "large":
+                    option.size = 280;
+                    break;
+            }
+            applySettingsToContainer(container, option);
+            persistOptionsToSource(option, plugin, ctx, el);
+        });
+    });
 
     // setting按钮点击显示/隐藏面板
     settingBtn.onclick = (e) => {
@@ -168,7 +237,7 @@ function createContainer(option: SettingOptions): HTMLDivElement {
     };
 
     // 点击面板外自动关闭
-    document.addEventListener('click', (e: any) => {
+    document.addEventListener("click", (e: any) => {
         if (!container.contains(e.target)) {
             panel.style.display = "none";
         }
@@ -185,12 +254,112 @@ function createContainer(option: SettingOptions): HTMLDivElement {
     return container;
 }
 
+/**
+ * 将 SettingOptions 应用到某个容器中的所有图片与容器本身。
+ * 这样 parseStyleOptions + 设置面板 就形成了统一的数据源。
+ */
+function applySettingsToContainer(container: HTMLDivElement, option: SettingOptions) {
+    container.style.setProperty("--plugin-container-gap", `${option.gap}px`);
+
+    const imgs = Array.from(container.querySelectorAll<HTMLImageElement>(".plugin-image"));
+    imgs.forEach((img) => {
+        // 尺寸 & 圆角
+        img.style.setProperty("--plugin-image-size", `${option.size}px`);
+        img.style.setProperty("--plugin-image-radius", `${option.radius}px`);
+
+        // 阴影
+        if (option.shadow) {
+            img.classList.add("plugin-image-shadow");
+        } else {
+            img.classList.remove("plugin-image-shadow");
+        }
+
+        // 边框
+        if (option.border) {
+            img.classList.add("plugin-image-border");
+        } else {
+            img.classList.remove("plugin-image-border");
+        }
+    });
+}
+
+/**
+ * 将当前 option 写回到对应 Markdown 文档的代码块中（更新/插入配置行）。
+ *
+ * 约定格式：
+ *   size=220&gap=10&radius=10&shadow=false&border=false---
+ *   ![img](...)
+ */
+function persistOptionsToSource(
+    option: SettingOptions,
+    plugin: ImgRowPlugin,
+    ctx: MarkdownPostProcessorContext,
+    el: HTMLElement,
+) {
+    const section = ctx.getSectionInfo(el);
+    if (!section) return;
+
+    const view = plugin.app.workspace.getActiveViewOfType(MarkdownView);
+    if (!view) return;
+    if (!view.file || view.file.path !== ctx.sourcePath) return;
+
+    const editor = view.editor;
+
+    const from = { line: section.lineStart + 1, ch: 0 };
+    const to = { line: section.lineEnd, ch: 0 };
+    const currentInner = editor.getRange(from, to);
+
+    const newInner = buildInnerSourceFromOptions(option, currentInner);
+    if (newInner === currentInner) return;
+
+    let textToInsert = newInner;
+    if (!textToInsert.endsWith("\n")) {
+        textToInsert += "\n";
+    }
+
+    editor.replaceRange(textToInsert, from, to);
+}
+
+/**
+ * 根据当前配置构造（或更新）代码块内部的文本内容。
+ * 会保留原有的图片 Markdown，只替换/添加配置行。
+ */
+function buildInnerSourceFromOptions(option: SettingOptions, currentInner: string): string {
+    const styleLine = buildStyleLineFromOptions(option);
+
+    if (!currentInner.includes("---")) {
+        // 原来没有任何配置，直接在最前面插入一行配置
+        const trimmed = currentInner.replace(/^\s*/, "");
+        return `${styleLine}---\n${trimmed}`;
+    }
+
+    const idx = currentInner.indexOf("---");
+    const after = currentInner.slice(idx + 3); // 去掉 '---'
+    // 去掉 '---' 后面紧跟的空白和换行，保留图片等内容
+    const imagesPart = after.replace(/^[ \t\r\n]*/, "");
+
+    return `${styleLine}---\n${imagesPart}`;
+}
+
+/**
+ * 将 SettingOptions 转为配置行字符串，供 parseStyleOptions 使用。
+ */
+function buildStyleLineFromOptions(option: SettingOptions): string {
+    const parts: string[] = [];
+    parts.push(`size=${option.size}`);
+    parts.push(`gap=${option.gap}`);
+    parts.push(`radius=${option.radius}`);
+    parts.push(`shadow=${option.shadow}`);
+    parts.push(`border=${option.border}`);
+    return parts.join("&");
+}
+
 function parseStyleOptions(source: string): SettingOptions {
     const settings = new SettingOptions();
     if (!source.includes("---")) return settings;
 
     const parts = source.split("---").map(part => part.trim());
-    const styleLines = parts[0].split("\n");
+    const styleLines = parts[0].split("&");
 
     for (const line of styleLines) {
         const [key, value] = line.split("=").map(s => s.trim());
