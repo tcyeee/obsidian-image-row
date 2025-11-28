@@ -162,12 +162,6 @@ function createContainer(
     panel.className = "plugin-image-setting-panel";
     panel.style.display = "none";
     panel.innerHTML = `
-      <label class="plugin-image-setting-checkbox">
-        <input type="checkbox" data-setting="border"/> border
-      </label>
-      <label class="plugin-image-setting-checkbox">
-        <input type="checkbox" data-setting="shadow"/> shadow
-      </label>
       <div class="plugin-image-setting-size-group">
         <label class="plugin-image-setting-size-radio">
           <input type="radio" data-size="small" name="${sizeGroupName}" /> S
@@ -179,6 +173,13 @@ function createContainer(
           <input type="radio" data-size="large" name="${sizeGroupName}" /> L
         </label>
       </div>
+      <label class="plugin-image-setting-checkbox">
+        <input type="checkbox" data-setting="border"/> border
+      </label>
+      <label class="plugin-image-setting-checkbox">
+        <input type="checkbox" data-setting="shadow"/> shadow
+      </label>
+
     `;
     container.appendChild(panel);
 
