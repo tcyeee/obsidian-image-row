@@ -1,5 +1,6 @@
 import { Plugin } from "obsidian";
 import { addImageLayoutMarkdownProcessor } from "./src/processor";
+import { imgsWrapper } from "./src/utils";
 
 export default class ImgRowPlugin extends Plugin {
 	async onload() {
@@ -17,11 +18,16 @@ export default class ImgRowPlugin extends Plugin {
 					/!\[.*?\]\((.*?)\)/.test(line) || /!\[\[.*?\]\]/.test(line);
 				if (!hasMarkdownImage) return;
 
+				// 提取当前行中的图片语法文本，如果有多张图，则取第一处匹配
+				const mdImageMatch =
+					line.match(/!\[.*?\]\((.*?)\)/) || line.match(/!\[\[.*?\]\]/);
+				const imageSyntax = mdImageMatch ? mdImageMatch[0] : line;
+
 				menu.addItem((item) => {
 					item
 						.setTitle("测试图片右键点击")
 						.onClick(() => {
-							console.log("hello world");
+							console.log(imgsWrapper(imageSyntax));
 						});
 				});
 			}),
