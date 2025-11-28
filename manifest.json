@@ -1,9 +1,9 @@
 {
-	"id": "image-row",
-	"name": "Image Row",
+	"id": "obsidian-image-cluster",
+	"name": "Obsidian Image Cluster",
 	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
-	"description": "The easiest way to display multiple images in a single row.",
+	"description": "Obsidian Image Cluster helps you easily combine multiple images together in your notes, making your note interface more beautiful and organized.",
 	"author": "tcyeee",
 	"authorUrl": "https://tcyeee.top",
 	"isDesktopOnly": false
