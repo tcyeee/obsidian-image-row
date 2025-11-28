@@ -1,15 +1,33 @@
-The images are displayed as thumbnails in a single row, where you can easily adjust the row height and view the full-size image by clicking on a thumbnail.
+![](assets/banner.png)
 
-![](assets/2.png)
+<div>中文｜<a>English</a></div>
 
-### ✅ How to Use
+Obsidian Image Cluster 可以让你在笔记中轻松将多张图片组合到一起，让你的笔记界面更美观。
 
 ![](assets/1.png)
 
-1. Create a code block with the language set to `imgs`.
-2. Inside the block, insert your image markdown
+## ✅ How to Use
 
-### ⭐ Optional Settings
+1. 对图片链接右键唤出菜单，点击“Wrap the images into a group”。
+2. 在“阅读模式下”，点击图片组右上角“设置”按钮，进行样式自定义。
+
+
+
+## ⭐ Optional Settings
+
+图片组的样式信息保存在`imgs`代码块第一行，以`;;`结尾，你手动修改其中参数，进行更深度的自定义。
+
+````text
+```imgs
+size=150&gap=8&radius=10&shadow=false&border=false;;
+![](assets/1.png)
+![](assets/2.png)
+![](assets/3.png)
+![](assets/4.png)
+```
+````
+
+### 可选参数
 
 | Option | Description                    | Default | Available options |
 | ------ | ------------------------------ | ------- | ----------------- |
