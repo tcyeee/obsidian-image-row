@@ -6,6 +6,24 @@
     border-radius: var(--plugin-image-radius, 10px);
   }
 
+/* 图片加载失败时显示的占位错误块 */
+.plugin-image-error {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  /* 使用与图片相同的尺寸变量，若未设置则退回默认值 */
+  width: var(--plugin-image-size, 220px);
+  height: var(--plugin-image-size, 220px);
+  padding: 12px;
+  border: 1px solid #ff6b6b;
+  border-radius: 6px;
+  background-color: #ffecec;
+  color: #d8000c;
+  box-sizing: border-box;
+}
+
 .plugin-image-shadow {
 	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
