@@ -1,20 +1,20 @@
-![](assets/banner.png)
+![](../assets/banner.png)
 
-<div>中文｜<a>English</a></div>
+<div align="center">中文 ｜ <a href="../README.md">English</a></div>
 
 Obsidian Image Cluster 可以让你在笔记中轻松将多张图片组合到一起，让你的笔记界面更美观。
 
-![](assets/1.png)
+![](../assets/1.png)
 
 ## ✅ How to Use
 
 1. 对图片链接右键唤出菜单，点击“Wrap the images into a group”。
 
-![](assets/2.gif)
+![](../assets/2.gif)
 
-2. 在“阅读模式下”，点击图片组右上角“设置”按钮，进行样式自定义。
+2. 在**阅读模式下**，点击图片组右上角“设置”按钮，进行样式自定义。
 
-![](assets/3.gif)
+![](../assets/3.gif)
 
 
 
