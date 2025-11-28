@@ -25,7 +25,8 @@ export default class ImgRowPlugin extends Plugin {
 
 				menu.addItem((item) => {
 					item
-						.setTitle("测试图片右键点击")
+						.setIcon("image")
+						.setTitle("Wrap the images into a group")
 						.onClick(() => {
 							const wrappedImageSyntax = imgsWrapper(imageSyntax);
 							// 使用生成的 ```imgs 代码块替换当前行的图片语法
