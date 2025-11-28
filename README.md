@@ -2,6 +2,11 @@
 
 <div align="center"><a href="i18n/README.zh.md">中文</a> ｜ English</div>
 
+<br>
+<br>
+<br>
+
+
 Obsidian Image Cluster helps you easily combine multiple images together in your notes, making your note interface more beautiful and organized.
 
 ![](assets/1.png)
