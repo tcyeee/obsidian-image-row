@@ -201,16 +201,26 @@ function createContainer(
         }
     });
 
-    // 绑定事件：勾选框/单选按钮改变时，实时更新配置并作用到当前容器
+    // 标记当前面板中的设置是否有尚未写回文件的更改
+    let hasPendingChanges = false;
+
+    // 在需要时将更改写回到对应 Markdown 文件
+    const persistIfNeeded = () => {
+        if (!hasPendingChanges) return;
+        hasPendingChanges = false;
+        persistOptionsToSource(option, plugin, ctx, el);
+    };
+
+    // 绑定事件：勾选框/单选按钮改变时，实时更新配置并作用到当前容器（但先不立刻写文件）
     borderCheckbox?.addEventListener("change", () => {
         option.border = !!borderCheckbox.checked;
         applySettingsToContainer(container, option);
-        persistOptionsToSource(option, plugin, ctx, el);
+        hasPendingChanges = true;
     });
     shadowCheckbox?.addEventListener("change", () => {
         option.shadow = !!shadowCheckbox.checked;
         applySettingsToContainer(container, option);
-        persistOptionsToSource(option, plugin, ctx, el);
+        hasPendingChanges = true;
     });
     sizeRadios.forEach((radio) => {
         radio.addEventListener("change", () => {
@@ -231,7 +241,7 @@ function createContainer(
                     break;
             }
             applySettingsToContainer(container, option);
-            persistOptionsToSource(option, plugin, ctx, el);
+            hasPendingChanges = true;
         });
     });
 
@@ -247,13 +257,23 @@ function createContainer(
         // setting按钮点击显示/隐藏面板
         settingBtn.onclick = (e) => {
             e.stopPropagation();
-            panel.style.display = panel.style.display === "none" ? "block" : "none";
+            const isOpen = panel.style.display !== "none";
+            if (isOpen) {
+                // 从打开到关闭：统一在此时写回所有更改
+                persistIfNeeded();
+                panel.style.display = "none";
+            } else {
+                panel.style.display = "block";
+            }
         };
 
         // 点击面板外自动关闭
         document.addEventListener("click", (e: any) => {
             if (!container.contains(e.target)) {
-                panel.style.display = "none";
+                if (panel.style.display !== "none") {
+                    persistIfNeeded();
+                    panel.style.display = "none";
+                }
             }
         });
 
@@ -262,7 +282,10 @@ function createContainer(
         });
         container.addEventListener("mouseleave", () => {
             settingBtn.style.display = "none";
-            panel.style.display = "none";
+            if (panel.style.display !== "none") {
+                persistIfNeeded();
+                panel.style.display = "none";
+            }
         });
     }
 
