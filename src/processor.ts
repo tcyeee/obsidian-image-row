@@ -53,8 +53,6 @@ function createImage(option: SettingOptions, src: string, srcList?: string[], id
         const largeImg = document.createElement("img");
         largeImg.src = srcList?.[curIdx] || src;
         largeImg.classList.add("plugin-image-large");
-        if (option.border) largeImg.classList.add("plugin-image-border-large");
-
         const prevBtn = document.createElement("button");
         prevBtn.textContent = "←";
         prevBtn.className = "plugin-image-nav-btn plugin-image-nav-btn-prev";
@@ -299,6 +297,7 @@ function createContainer(
 function applySettingsToContainer(container: HTMLDivElement, option: SettingOptions) {
     container.style.setProperty("--plugin-container-gap", `${option.gap}px`);
 
+    // 这里只处理图片组中的缩略图，不包含大图预览；大图预览始终保持原图样式
     const imgs = Array.from(container.querySelectorAll<HTMLImageElement>(".plugin-image"));
     imgs.forEach((img) => {
         // 尺寸 & 圆角
