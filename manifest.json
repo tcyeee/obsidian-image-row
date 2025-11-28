@@ -1,9 +1,9 @@
 {
-	"id": "obsidian-image-cluster",
-	"name": "Obsidian Image Cluster",
+	"id": "image-cluster",
+	"name": "Image Cluster",
 	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
-	"description": "Obsidian Image Cluster helps you easily combine multiple images together in your notes, making your note interface more beautiful and organized.",
+	"description": "Image Cluster helps you easily combine multiple images together in your notes, making your note interface more beautiful and organized.",
 	"author": "tcyeee",
 	"authorUrl": "https://tcyeee.top",
 	"isDesktopOnly": false
