@@ -11,6 +11,25 @@ Obsidian Image Cluster helps you easily combine multiple images together in your
 
 ![](assets/1.png)
 
+## ⬇️ Installation
+
+### From Community Plugins (Recommended)
+
+You can install the plugin directly from Obsidian's Community Plugins browser:
+
+1. Open Obsidian and go to Settings > Community plugins
+2. Click on Browse and search for "Image Cluster"
+3. Click Install and then Enable the plugin
+   
+You can also install the plugin directly from its Community Plugins entry: [Image Cluster on Obsidian](https://obsidian.md/plugins?id=image-cluster).
+
+### Manual Installation
+
+1. Download the latest release from [GitHub Releases](https://github.com/tcyeee/obsidian-image-cluster/releases)
+2. Extract main.js, manifest.json, and styles.css to your vault's `.obsidian/plugins/image-cluster/` directory
+3. Reload Obsidian and enable the plugin in Settings → Community plugins
+
+
 ## ✅ How to Use
 
 1. Right‑click on an image link and choose “Wrap the images into a group”.
@@ -22,7 +41,7 @@ Obsidian Image Cluster helps you easily combine multiple images together in your
 ![](assets/3.gif)
 
 
-## ⭐ Optional Settings
+## ⚙️ Configuration
 
 The style configuration of an image group is stored in the first line of the `imgs` code block and ends with `;;`.  
 You can manually tweak the parameters there for deeper customization.
