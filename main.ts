@@ -27,7 +27,14 @@ export default class ImgRowPlugin extends Plugin {
 					item
 						.setTitle("测试图片右键点击")
 						.onClick(() => {
-							console.log(imgsWrapper(imageSyntax));
+							const wrappedImageSyntax = imgsWrapper(imageSyntax);
+							// 使用生成的 ```imgs 代码块替换当前行的图片语法
+							const lineNo = cursor.line;
+							editor.replaceRange(
+								wrappedImageSyntax,
+								{ line: lineNo, ch: 0 },
+								{ line: lineNo, ch: line.length },
+							);
 						});
 				});
 			}),
