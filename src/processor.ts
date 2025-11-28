@@ -1,7 +1,7 @@
 import ImgRowPlugin from "main";
 import { createErrorDiv } from "src/utils";
 import { SettingOptions as SettingOptions } from "./domain";
-import { MarkdownView, MarkdownPostProcessorContext } from "obsidian";
+import { MarkdownView, MarkdownPostProcessorContext, TFile } from "obsidian";
 
 export function addImageLayoutMarkdownProcessor(plugin: ImgRowPlugin) {
     plugin.registerMarkdownCodeBlockProcessor("imgs", (source, el, ctx) => {
@@ -302,8 +302,12 @@ function applySettingsToContainer(container: HTMLDivElement, option: SettingOpti
  * 约定格式：
  *   size=220&gap=10&radius=10&shadow=false&border=false---
  *   ![img](...)
+ *
+ * 注意：
+ * - 之前用 editor.replaceRange 在某些情况下（多窗口 / 预览模式等）会出现「逻辑上写入成功但在 Obsidian 里看不到」的问题。
+ * - 这里改为直接基于 Vault 文件内容进行修改，再整体写回，保证预览和编辑视图都能正确刷新。
  */
-function persistOptionsToSource(
+async function persistOptionsToSource(
     option: SettingOptions,
     plugin: ImgRowPlugin,
     ctx: MarkdownPostProcessorContext,
@@ -312,25 +316,41 @@ function persistOptionsToSource(
     const section = ctx.getSectionInfo(el);
     if (!section) return;
 
-    const view = plugin.app.workspace.getActiveViewOfType(MarkdownView);
-    if (!view) return;
-    if (!view.file || view.file.path !== ctx.sourcePath) return;
+    // 通过 ctx.sourcePath 拿到真正的文件，而不是依赖当前激活视图
+    const file = plugin.app.vault.getAbstractFileByPath(ctx.sourcePath);
+    if (!(file instanceof TFile)) return;
 
-    const editor = view.editor;
+    // 读取整篇文档文本
+    const content = await plugin.app.vault.read(file);
+    const lines = content.split("\n");
 
-    const from = { line: section.lineStart + 1, ch: 0 };
-    const to = { line: section.lineEnd, ch: 0 };
-    const currentInner = editor.getRange(from, to);
+    // 代码块内部内容所在的行范围：
+    // section.lineStart    -> ```imgs 这一行
+    // section.lineStart+1  -> 代码块内部第一行
+    // section.lineEnd      -> ``` 这一行
+    const innerStart = section.lineStart + 1;
+    const innerEnd = section.lineEnd;
 
+    if (innerStart >= innerEnd || innerStart < 0 || innerEnd > lines.length) {
+        return;
+    }
+
+    const currentInner = lines.slice(innerStart, innerEnd).join("\n");
     const newInner = buildInnerSourceFromOptions(option, currentInner);
     if (newInner === currentInner) return;
 
-    let textToInsert = newInner;
-    if (!textToInsert.endsWith("\n")) {
-        textToInsert += "\n";
-    }
+    // buildInnerSourceFromOptions 可能会在末尾带一个换行，这里统一拆成行数组
+    const newInnerLines = newInner.endsWith("\n")
+        ? newInner.slice(0, -1).split("\n")
+        : newInner.split("\n");
 
-    editor.replaceRange(textToInsert, from, to);
+    const newLines = [
+        ...lines.slice(0, innerStart),
+        ...newInnerLines,
+        ...lines.slice(innerEnd),
+    ];
+
+    await plugin.app.vault.modify(file, newLines.join("\n"));
 }
 
 /**
