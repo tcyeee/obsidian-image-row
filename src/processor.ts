@@ -301,7 +301,7 @@ function applySettingsToContainer(container: HTMLDivElement, option: SettingOpti
  * 将当前 option 写回到对应 Markdown 文档的代码块中（更新/插入配置行）。
  *
  * 约定格式：
- *   size=220&gap=10&radius=10&shadow=false&border=false---
+ *   size=220&gap=10&radius=10&shadow=false&border=false;;
  *   ![img](...)
  *
  * 注意：
@@ -361,18 +361,18 @@ async function persistOptionsToSource(
 function buildInnerSourceFromOptions(option: SettingOptions, currentInner: string): string {
     const styleLine = buildStyleLineFromOptions(option);
 
-    if (!currentInner.includes("---")) {
+    if (!currentInner.includes(";;")) {
         // 原来没有任何配置，直接在最前面插入一行配置
         const trimmed = currentInner.replace(/^\s*/, "");
-        return `${styleLine}---\n${trimmed}`;
+        return `${styleLine};;\n${trimmed}`;
     }
 
-    const idx = currentInner.indexOf("---");
-    const after = currentInner.slice(idx + 3); // 去掉 '---'
-    // 去掉 '---' 后面紧跟的空白和换行，保留图片等内容
+    const idx = currentInner.indexOf(";;");
+    const after = currentInner.slice(idx + 3); // 去掉 ';;'
+    // 去掉 ';;' 后面紧跟的空白和换行，保留图片等内容
     const imagesPart = after.replace(/^[ \t\r\n]*/, "");
 
-    return `${styleLine}---\n${imagesPart}`;
+    return `${styleLine};;\n${imagesPart}`;
 }
 
 /**
@@ -390,9 +390,9 @@ function buildStyleLineFromOptions(option: SettingOptions): string {
 
 function parseStyleOptions(source: string): SettingOptions {
     const settings = new SettingOptions();
-    if (!source.includes("---")) return settings;
+    if (!source.includes(";;")) return settings;
 
-    const parts = source.split("---").map(part => part.trim());
+    const parts = source.split(";;").map(part => part.trim());
     const styleLines = parts[0].split("&");
 
     for (const line of styleLines) {
