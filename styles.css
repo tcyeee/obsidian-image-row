@@ -139,13 +139,13 @@
     right: 35px;
     color: rgb(97, 97, 97);
     cursor: pointer;
-    display: none;
     align-items: center;
     justify-content: center;
     z-index: 10;
 }
 
-.plugin-image-setting-btn:hover {
+/* 鼠标悬停在整个图片容器区域时，显示右上角的 setting 按钮 */
+.plugin-image-container:hover .plugin-image-setting-btn{
   background: black;
 }
 
