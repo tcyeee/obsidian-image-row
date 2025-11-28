@@ -133,7 +133,7 @@
   color: #2350a2;
 }
 
-.plugin-image-setting-btn {
+.plugin-image-setting-btn-container {
     position: absolute;
     top: 9px;
     right: 35px;
@@ -145,8 +145,8 @@
 }
 
 /* 鼠标悬停在整个图片容器区域时，显示右上角的 setting 按钮 */
-.plugin-image-container:hover .plugin-image-setting-btn{
-  background: black;
+.plugin-image-container:hover .plugin-image-setting-btn-container{
+  background: white;
 }
 
 .icon--settings {

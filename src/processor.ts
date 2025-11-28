@@ -149,7 +149,8 @@ function createContainer(
 
     // setting按钮（仅在阅读模式下可见）
     const settingBtn = document.createElement("button");
-    settingBtn.className = "plugin-image-setting-btn icon--settings";
+    settingBtn.className = "plugin-image-setting-btn-container";
+    settingBtn.innerHTML = `<div class="plugin-image-setting-btn icon--settings">`;
     settingBtn.style.display = "none";
     container.appendChild(settingBtn);
 
