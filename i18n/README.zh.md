@@ -2,6 +2,10 @@
 
 <div align="center">中文 ｜ <a href="../README.md">English</a></div>
 
+<br>
+<br>
+<br>
+
 Obsidian Image Cluster 可以让你在笔记中轻松将多张图片组合到一起，让你的笔记界面更美观。
 
 ![](../assets/1.png)
