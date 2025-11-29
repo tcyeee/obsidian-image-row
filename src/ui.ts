@@ -19,7 +19,7 @@ export function createSettingButtonElement(): HTMLButtonElement {
     settingBtn.className = "plugin-image-setting-btn-container";
 
     const settingIcon = document.createElement("div");
-    settingIcon.className = "plugin-image-setting-btn icon--settings";
+    settingIcon.className = "icon--settings";
 
     settingBtn.appendChild(settingIcon);
 

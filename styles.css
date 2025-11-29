@@ -262,6 +262,7 @@
     --svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cg fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2'%3E%3Cpath d='M14 17H5M19 7h-9'/%3E%3Ccircle cx='17' cy='17' r='3'/%3E%3Ccircle cx='7' cy='7' r='3'/%3E%3C/g%3E%3C/svg%3E");    display: inline-block;
     width: 16px;
     height: 16px;
+    color: gray;
     background-color: currentColor;
     -webkit-mask-image: var(--svg);
     mask-image: var(--svg);
