@@ -5,6 +5,9 @@ import { SettingOptions as SettingOptions, SettingPanelDom } from "./domain";
 import { MarkdownView, MarkdownPostProcessorContext, TFile, normalizePath } from "obsidian";
 import { config } from "./config";
 
+// 记录当前正在生成的缩略图路径，避免并发情况下对同一文件重复 createBinary 导致 "File already exists."
+const generatingThumbnails = new Set<string>();
+
 type MarkdownViewWithCurrentMode = MarkdownView & {
     currentMode?: {
         type: string;
@@ -181,8 +184,18 @@ function createImage(option: SettingOptions, src: string, srcList?: string[], id
  * 3. 写入 vault 的 cache 目录
  * 4. 生成完成后，刷新传入 img 元素的 src
  */
-async function ensureThumbnailForFile(plugin: ImgRowPlugin, file: TFile, thumbPath: string, imgEl: HTMLImageElement,
+async function ensureThumbnailForFile(
+    plugin: ImgRowPlugin,
+    file: TFile,
+    thumbPath: string,
+    imgEl: HTMLImageElement,
 ): Promise<void> {
+    // 避免同一缩略图被并发生成（多次渲染同一代码块 / 快速切换视图时可能发生）
+    if (generatingThumbnails.has(thumbPath)) {
+        return;
+    }
+    generatingThumbnails.add(thumbPath);
+
     try {
         // 再次检查，避免并发情况下重复生成
         const existed = plugin.app.vault.getAbstractFileByPath(thumbPath);
@@ -257,7 +270,17 @@ async function ensureThumbnailForFile(plugin: ImgRowPlugin, file: TFile, thumbPa
         // 写入完成后，刷新 img 的 src 指向新生成的缩略图
         imgEl.src = plugin.app.vault.getResourcePath(newThumb);
     } catch (error) {
+        // 如果只是并发场景下偶发的 "File already exists."，尝试直接复用已存在文件，并不视为真正错误
+        if (error instanceof Error && error.message === "File already exists.") {
+            const existedNow = plugin.app.vault.getAbstractFileByPath(thumbPath);
+            if (existedNow instanceof TFile) {
+                imgEl.src = plugin.app.vault.getResourcePath(existedNow);
+                return;
+            }
+        }
         console.error("Failed to generate thumbnail for", file.path, error);
+    } finally {
+        generatingThumbnails.delete(thumbPath);
     }
 }
 
