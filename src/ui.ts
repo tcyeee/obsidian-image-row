@@ -80,14 +80,11 @@ export function createSettingPanelDom(sizeGroupName: string): SettingPanelDom {
         return label;
     };
 
-    const borderCheckboxLabel = createSettingCheckbox("border", "border");
-    const shadowCheckboxLabel = createSettingCheckbox("shadow", "shadow");
-
     const panel = document.createElement("div");
     panel.className = "plugin-image-setting-panel";
     panel.appendChild(sizeGroup);
-    panel.appendChild(borderCheckboxLabel);
-    panel.appendChild(shadowCheckboxLabel);
+    panel.appendChild(createSettingCheckbox("border", "border"));
+    panel.appendChild(createSettingCheckbox("shadow", "shadow"));
 
     const borderCheckbox = panel.querySelector<HTMLInputElement>('input[data-setting="border"]');
     const shadowCheckbox = panel.querySelector<HTMLInputElement>('input[data-setting="shadow"]');
