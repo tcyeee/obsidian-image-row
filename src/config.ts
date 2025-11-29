@@ -19,4 +19,9 @@ export const config = {
     LARGE_SIZE: 220,
     LARGE_GAP: 10,
     LARGE_RADIUS: 10,
+
+    /* THUMBNAIL */
+    THUMBNAIL_PATH: ".cache/",
+    THUMBNAIL_QUALITY: 0.8, // 缩略图质量
+    THUMBNAIL_SIZE: 220,    // 缩略图尺寸
 };
