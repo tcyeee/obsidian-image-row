@@ -21,7 +21,9 @@ export const config = {
     LARGE_RADIUS: 10,
 
     /* THUMBNAIL */
-    THUMBNAIL_PATH: ".cache/",
+    // 注意：Obsidian 对以 "." 开头的目录（例如 ".cache"）不会作为 Vault 内容进行索引，
+    // 因此缩略图目录必须使用非点开头的路径，才能通过 vault.getAbstractFileByPath 正常访问。
+    THUMBNAIL_PATH: "assets/cache/",
     THUMBNAIL_QUALITY: 0.8, // 缩略图质量
     THUMBNAIL_SIZE: 220,    // 缩略图尺寸
 };

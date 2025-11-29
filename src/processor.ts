@@ -51,12 +51,6 @@ export function addImageLayoutMarkdownProcessor(plugin: ImgRowPlugin) {
                         : originalSrc;
 
                     // 列表中展示缩略图，点击后仍然使用 srcList 中的原图
-
-                    console.log("------");
-                    console.log("thumbFile instanceof TFile:" + (thumbFile instanceof TFile));
-                    console.log(thumbPath);
-                    console.log(thumbFile);
-
                     const imgEl = createImage(option, thumbSrc, srcList, imgIdx);
                     container.appendChild(imgEl);
 
