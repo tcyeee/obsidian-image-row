@@ -274,7 +274,7 @@ function setupSettingPanel(
     const persistIfNeeded = () => {
         if (!hasPendingChanges) return;
         hasPendingChanges = false;
-        persistOptionsToSource(option, plugin, ctx, el);
+        void persistOptionsToSource(option, plugin, ctx, el);
     };
 
     // 绑定事件：勾选框/单选按钮改变时，实时更新配置并作用到当前容器（但先不立刻写文件）
