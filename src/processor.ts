@@ -49,7 +49,10 @@ export function addImageLayoutMarkdownProcessor(plugin: ImgRowPlugin) {
 
                     // 列表中展示缩略图，点击后仍然使用 srcList 中的原图
                     const imgEl = createImage(option, thumbSrc, srcList, imgIdx);
-                    container.appendChild(imgEl);
+                    const wrapper = document.createElement("div");
+                    wrapper.classList.add("plugin-image-wrapper");
+                    wrapper.appendChild(imgEl);
+                    container.appendChild(wrapper);
 
                     // 如果当前还没有缩略图，则在后台异步生成一份，并在生成后刷新当前 img 的 src
                     if (!(thumbFile instanceof TFile)) {
@@ -364,9 +367,15 @@ function applySettingsToContainer(container: HTMLDivElement, option: SettingOpti
     // 这里只处理图片组中的缩略图，不包含大图预览；大图预览始终保持原图样式
     const imgs = Array.from(container.querySelectorAll<HTMLImageElement>(".plugin-image"));
     imgs.forEach((img) => {
-        // 尺寸 & 圆角
+        const wrapper = img.parentElement instanceof HTMLElement ? img.parentElement : null;
+
+        // 尺寸 & 圆角（同时作用于图片与外层 wrapper，保证布局和裁剪一致）
         img.style.setProperty("--plugin-image-size", `${option.size}px`);
         img.style.setProperty("--plugin-image-radius", `${option.radius}px`);
+        if (wrapper) {
+            wrapper.style.setProperty("--plugin-image-size", `${option.size}px`);
+            wrapper.style.setProperty("--plugin-image-radius", `${option.radius}px`);
+        }
 
         // 阴影
         if (option.shadow) {
@@ -384,8 +393,16 @@ function applySettingsToContainer(container: HTMLDivElement, option: SettingOpti
 
         // 隐藏（蒙版/模糊处理）
         if (option.hidden) {
-            img.classList.add("plugin-image-hidden");
+            // 优先对外层 wrapper 进行模糊处理，并通过 overflow 裁剪掉溢出的模糊边缘
+            if (wrapper && wrapper.classList.contains("plugin-image-wrapper")) {
+                wrapper.classList.add("plugin-image-hidden");
+            } else {
+                img.classList.add("plugin-image-hidden");
+            }
         } else {
+            if (wrapper && wrapper.classList.contains("plugin-image-wrapper")) {
+                wrapper.classList.remove("plugin-image-hidden");
+            }
             img.classList.remove("plugin-image-hidden");
         }
     });
