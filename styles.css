@@ -32,6 +32,10 @@
 	border: 1px solid #ccc;
 }
 
+.plugin-image-hidden {
+  filter: blur(14px);
+}
+
 .plugin-image-overlay {
 	position: fixed;
 	top: 0; 

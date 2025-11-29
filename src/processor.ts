@@ -272,13 +272,14 @@ function setupSettingPanel(
     container: HTMLDivElement,
     sizeGroupName: string,
 ): { panel: HTMLDivElement; persistIfNeeded: () => void } {
-    const { panel, borderCheckbox, shadowCheckbox, sizeRadios }: SettingPanelDom = createSettingPanelDom(sizeGroupName);
+    const { panel, borderCheckbox, shadowCheckbox, hiddenCheckbox, sizeRadios }: SettingPanelDom = createSettingPanelDom(sizeGroupName);
 
     container.appendChild(panel);
 
     // 根据当前的配置初始化面板勾选状态
     if (borderCheckbox) borderCheckbox.checked = option.border;
     if (shadowCheckbox) shadowCheckbox.checked = option.shadow;
+    if (hiddenCheckbox) hiddenCheckbox.checked = option.hidden;
     // 根据当前 size 推断 S / M / L
     const currentSize = option.size;
     const pickSizeLabel = currentSize <= 90 ? "small" : currentSize <= 150 ? "medium" : "large";
@@ -308,6 +309,11 @@ function setupSettingPanel(
     });
     shadowCheckbox?.addEventListener("change", () => {
         option.shadow = !!shadowCheckbox.checked;
+        applySettingsToContainer(container, option);
+        hasPendingChanges = true;
+    });
+    hiddenCheckbox?.addEventListener("change", () => {
+        option.hidden = !!hiddenCheckbox.checked;
         applySettingsToContainer(container, option);
         hasPendingChanges = true;
     });
@@ -374,6 +380,13 @@ function applySettingsToContainer(container: HTMLDivElement, option: SettingOpti
             img.classList.add("plugin-image-border");
         } else {
             img.classList.remove("plugin-image-border");
+        }
+
+        // 隐藏（蒙版/模糊处理）
+        if (option.hidden) {
+            img.classList.add("plugin-image-hidden");
+        } else {
+            img.classList.remove("plugin-image-hidden");
         }
     });
 }

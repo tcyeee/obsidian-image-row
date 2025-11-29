@@ -4,6 +4,7 @@ export const config = {
     DEFAULT_RADIUS: 8,     // 默认图片圆角
     DEFAULT_SHADOW: true,  // 默认显示阴影
     DEFAULT_BORDER: false, // 默认不显示边框
+    DEFAULT_HIDDEN: false, // 默认不隐藏图片（无蒙版）
 
     /* SMALL */
     SMALL_SIZE: 90,

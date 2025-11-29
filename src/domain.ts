@@ -7,6 +7,7 @@ export class SettingOptions {
     gap: number = config.DEFAULT_GAP;
     shadow: boolean = config.DEFAULT_SHADOW;
     border: boolean = config.DEFAULT_BORDER;
+    hidden: boolean = config.DEFAULT_HIDDEN;
 
     /**
      * 将 SettingOptions 转为配置行字符串，供 parseStyleOptions 使用。
@@ -18,6 +19,7 @@ export class SettingOptions {
         parts.push(`radius=${this.radius}`);
         parts.push(`shadow=${this.shadow}`);
         parts.push(`border=${this.border}`);
+        parts.push(`hidden=${this.hidden}`);
         return parts.join("&");
     }
 }
@@ -26,6 +28,7 @@ export interface SettingPanelDom {
     panel: HTMLDivElement;
     borderCheckbox: HTMLInputElement | null;
     shadowCheckbox: HTMLInputElement | null;
+    hiddenCheckbox: HTMLInputElement | null;
     sizeRadios: HTMLInputElement[];
 }
 

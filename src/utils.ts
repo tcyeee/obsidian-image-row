@@ -58,11 +58,11 @@ export function setCssProps(el: HTMLElement, props: Record<string, string>): voi
  * @param source - 代码块内容
  * 
  * 配置行格式：
- *   size=220&gap=10&radius=10&shadow=false&border=false;;
+ *   size=220&gap=10&radius=10&shadow=false&border=false&hidden=false;;
  *   ![img](...)
  * 
  * 返回配置对象：
- *   { size: 220, gap: 10, radius: 10, shadow: false, border: false }
+ *   { size: 220, gap: 10, radius: 10, shadow: false, border: false, hidden: false }
  */
 export function parseStyleOptions(source: string): SettingOptions {
   const settings = new SettingOptions();
@@ -83,6 +83,7 @@ export function parseStyleOptions(source: string): SettingOptions {
     }
     if (key == "shadow") settings.shadow = value.toLowerCase() === "true";
     if (key == "border") settings.border = value.toLowerCase() === "true";
+    if (key == "hidden") settings.hidden = value.toLowerCase() === "true";
   }
   return settings;
 }
