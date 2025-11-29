@@ -122,18 +122,61 @@
   display: flex;
 }
 .plugin-image-setting-checkbox {
-  margin-top: -10px;
-  user-select: none;
-  font-size: 14px;
-  color: #575757;
   display: flex;
   align-items: center;
-  line-height: 1.1;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 13px;
+  color: #575757;
 }
 .plugin-image-setting-panel input[type="checkbox"] {
-  margin-right: 9px;
   accent-color: #888;
-  transform: scale(1.0);
+}
+.plugin-image-setting-checkbox-label {
+  user-select: none;
+}
+.plugin-image-setting-switch {
+  position: relative;
+  width: 34px;
+  height: 18px;
+  flex-shrink: 0;
+}
+.plugin-image-setting-switch-input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  margin: 0;
+  cursor: pointer;
+}
+.plugin-image-setting-switch-track {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  background: rgba(210, 214, 222, 0.9);
+  box-shadow: 0 0 0 1px rgba(160, 170, 190, 0.5) inset;
+  transition: background 0.18s ease;
+}
+.plugin-image-setting-switch-track::before {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+  transition: transform 0.18s ease;
+}
+.plugin-image-setting-switch-input:checked + .plugin-image-setting-switch-track {
+  background: #5677c0;
+  box-shadow: 0 0 0 1px rgba(40, 90, 180, 0.35);
+}
+.plugin-image-setting-switch-input:checked + .plugin-image-setting-switch-track::before {
+  transform: translateX(16px);
+}
+.plugin-image-setting-checkbox:hover .plugin-image-setting-switch-track {
+  background: rgba(200, 205, 216, 0.9);
 }
 .plugin-image-setting-size-group {
   position: relative;

@@ -34,7 +34,6 @@ export function createSettingPanelDom(sizeGroupName: string): SettingPanelDom {
     // 尺寸选项分组（滑块样式的按钮组）
     const sizeGroup = document.createElement("div");
     sizeGroup.className = "plugin-image-setting-size-group";
-    // 默认选中中号，用于初始化滑块位置；实际选中值会在外部根据 SettingOptions 覆盖
     sizeGroup.dataset.size = "medium";
 
     // 背景滑块条
@@ -42,43 +41,9 @@ export function createSettingPanelDom(sizeGroupName: string): SettingPanelDom {
     slider.className = "plugin-image-setting-size-slider";
     sizeGroup.appendChild(slider);
 
-    // 尺寸选项单选（内部仍然使用 radio，外观是按钮组）
-    const createSizeRadio = (sizeKey: "small" | "medium" | "large", labelText: string) => {
-        const label = document.createElement("label");
-        label.className = "plugin-image-setting-size-radio";
-
-        const input = document.createElement("input");
-        input.type = "radio";
-        input.className = "plugin-image-setting-size-radio-input";
-        input.dataset.size = sizeKey;
-        input.name = sizeGroupName;
-
-        const textSpan = document.createElement("span");
-        textSpan.className = "plugin-image-setting-size-radio-text";
-        textSpan.textContent = labelText;
-
-        label.appendChild(input);
-        label.appendChild(textSpan);
-        return label;
-    };
-
-    sizeGroup.appendChild(createSizeRadio("small", "S"));
-    sizeGroup.appendChild(createSizeRadio("medium", "M"));
-    sizeGroup.appendChild(createSizeRadio("large", "L"));
-
-    // checkbox：边框 & 阴影
-    const createSettingCheckbox = (settingKey: "border" | "shadow", text: string) => {
-        const label = document.createElement("label");
-        label.className = "plugin-image-setting-checkbox";
-
-        const input = document.createElement("input");
-        input.type = "checkbox";
-        input.dataset.setting = settingKey;
-
-        label.appendChild(input);
-        label.appendChild(document.createTextNode(` ${text}`));
-        return label;
-    };
+    sizeGroup.appendChild(createSizeRadio("small", "S", sizeGroupName));
+    sizeGroup.appendChild(createSizeRadio("medium", "M", sizeGroupName));
+    sizeGroup.appendChild(createSizeRadio("large", "L", sizeGroupName));
 
     const panel = document.createElement("div");
     panel.className = "plugin-image-setting-panel";
@@ -94,6 +59,63 @@ export function createSettingPanelDom(sizeGroupName: string): SettingPanelDom {
 
     return { panel, borderCheckbox, shadowCheckbox, sizeRadios };
 }
+
+// 尺寸选项单选（内部仍然使用 radio，外观是按钮组）
+function createSizeRadio(sizeKey: "small" | "medium" | "large", labelText: string, sizeGroupName: string) {
+    const label = document.createElement("label");
+    label.className = "plugin-image-setting-size-radio";
+
+    const input = document.createElement("input");
+    input.type = "radio";
+    input.className = "plugin-image-setting-size-radio-input";
+    input.dataset.size = sizeKey;
+    input.name = sizeGroupName;
+
+    const textSpan = document.createElement("span");
+    textSpan.className = "plugin-image-setting-size-radio-text";
+    textSpan.textContent = labelText;
+
+    label.appendChild(input);
+    label.appendChild(textSpan);
+    return label;
+};
+
+/**
+ * 创建 setting 面板中的 checkbox 元素
+ * 
+ * @param settingKey - 设置键（border 或 shadow）
+ * @param text - 文字
+ * @param checked - 是否选中
+ * @returns 
+ */
+function createSettingCheckbox(settingKey: "border" | "shadow", text: string) {
+    const label = document.createElement("label");
+    label.className = "plugin-image-setting-checkbox";
+
+    const textSpan = document.createElement("span");
+    textSpan.className = "plugin-image-setting-checkbox-label";
+    textSpan.textContent = text;
+
+    const switchWrapper = document.createElement("div");
+    switchWrapper.className = "plugin-image-setting-switch";
+
+    const input = document.createElement("input");
+    input.type = "checkbox";
+    input.className = "plugin-image-setting-switch-input";
+    input.dataset.setting = settingKey;
+
+    const track = document.createElement("span");
+    track.className = "plugin-image-setting-switch-track";
+
+    switchWrapper.appendChild(input);
+    switchWrapper.appendChild(track);
+
+    label.appendChild(textSpan);
+    label.appendChild(switchWrapper);
+
+    return label;
+};
+
 
 /**
  * 创建错误提示元素
