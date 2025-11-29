@@ -17,11 +17,9 @@ export function createSettingButtonElement(): HTMLButtonElement {
     const settingBtn = document.createElement("button");
     settingBtn.type = "button";
     settingBtn.className = "plugin-image-setting-btn-container";
-    settingBtn.setAttribute("aria-label", "setting");
 
     const settingIcon = document.createElement("div");
     settingIcon.className = "plugin-image-setting-btn icon--settings";
-    settingIcon.setAttribute("aria-hidden", "true");
 
     settingBtn.appendChild(settingIcon);
 
@@ -33,15 +31,7 @@ export function createSettingButtonElement(): HTMLButtonElement {
  * 只负责元素创建与基础属性，勾选状态与事件绑定由调用方处理。
  */
 export function createSettingPanelDom(sizeGroupName: string): SettingPanelDom {
-    const panel = document.createElement("div");
-    panel.className = "plugin-image-setting-panel";
-
-    // 尺寸选项分组
-    const sizeGroup = document.createElement("div");
-    sizeGroup.className = "plugin-image-setting-size-group";
-    sizeGroup.setAttribute("role", "radiogroup");
-    sizeGroup.setAttribute("aria-label", "图片尺寸");
-
+    // 尺寸选项单选
     const createSizeRadio = (sizeKey: "small" | "medium" | "large", labelText: string) => {
         const label = document.createElement("label");
         label.className = "plugin-image-setting-size-radio";
@@ -50,13 +40,15 @@ export function createSettingPanelDom(sizeGroupName: string): SettingPanelDom {
         input.type = "radio";
         input.dataset.size = sizeKey;
         input.name = sizeGroupName;
-        input.setAttribute("aria-label", labelText);
 
         label.appendChild(input);
         label.appendChild(document.createTextNode(` ${labelText}`));
         return label;
     };
 
+    // 尺寸选项分组
+    const sizeGroup = document.createElement("div");
+    sizeGroup.className = "plugin-image-setting-size-group";
     sizeGroup.appendChild(createSizeRadio("small", "S"));
     sizeGroup.appendChild(createSizeRadio("medium", "M"));
     sizeGroup.appendChild(createSizeRadio("large", "L"));
@@ -69,7 +61,6 @@ export function createSettingPanelDom(sizeGroupName: string): SettingPanelDom {
         const input = document.createElement("input");
         input.type = "checkbox";
         input.dataset.setting = settingKey;
-        input.setAttribute("aria-label", text);
 
         label.appendChild(input);
         label.appendChild(document.createTextNode(` ${text}`));
@@ -79,6 +70,8 @@ export function createSettingPanelDom(sizeGroupName: string): SettingPanelDom {
     const borderCheckboxLabel = createSettingCheckbox("border", "border");
     const shadowCheckboxLabel = createSettingCheckbox("shadow", "shadow");
 
+    const panel = document.createElement("div");
+    panel.className = "plugin-image-setting-panel";
     panel.appendChild(sizeGroup);
     panel.appendChild(borderCheckboxLabel);
     panel.appendChild(shadowCheckboxLabel);
@@ -89,12 +82,7 @@ export function createSettingPanelDom(sizeGroupName: string): SettingPanelDom {
         panel.querySelectorAll<HTMLInputElement>('input[type="radio"][name="' + sizeGroupName + '"]'),
     );
 
-    return {
-        panel,
-        borderCheckbox,
-        shadowCheckbox,
-        sizeRadios,
-    };
+    return { panel, borderCheckbox, shadowCheckbox, sizeRadios };
 }
 
 /**

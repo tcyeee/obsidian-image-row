@@ -75,32 +75,14 @@ export function parseStyleOptions(source: string): SettingOptions {
     const [key, value] = line.split("=").map(s => s.trim());
     if (!key || value === undefined) continue;
 
-    switch (key) {
-      case "size":
-        const size = Number(value);
-        if (!Number.isNaN(size) && size >= 50 && size <= 500) {
-          settings.size = size;
-        }
-        break;
-      case "gap":
-        const gap = Number(value);
-        if (!Number.isNaN(gap) && gap >= 0 && gap <= 50) {
-          settings.gap = gap;
-        }
-        break;
-      case "radius":
-        const radius = Number(value);
-        if (!Number.isNaN(radius) && radius >= 0 && radius <= 50) {
-          settings.radius = radius;
-        }
-        break;
-      case "shadow":
-        settings.shadow = value.toLowerCase() === "true";
-        break;
-      case "border":
-        settings.border = value.toLowerCase() === "true";
-        break;
+    if (["size", "gap", "radius"].includes(key)) {
+      const num = Number(value);
+      if (key == "size" && num >= 50 && num <= 500) settings.size = num;
+      if (key == "gap" && num >= 0 && num <= 50) settings.gap = num;
+      if (key == "radius" && num >= 0 && num <= 50) settings.radius = num;
     }
+    if (key == "shadow") settings.shadow = value.toLowerCase() === "true";
+    if (key == "border") settings.border = value.toLowerCase() === "true";
   }
   return settings;
 }
