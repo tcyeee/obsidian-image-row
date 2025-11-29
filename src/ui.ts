@@ -107,7 +107,7 @@ export function createSettingPanelDom(sizeGroupName: string): SettingPanelDom {
  */
 export function createErrorDiv(option: SettingOptions): HTMLDivElement {
     const errorDiv = document.createElement("div");
-    errorDiv.className = "plugin-image-error";
+    errorDiv.classList.add("plugin-image-error", "plugin-image");
 
     const icon = document.createElement("div");
     icon.className = "icon--error-picture";
@@ -117,5 +117,9 @@ export function createErrorDiv(option: SettingOptions): HTMLDivElement {
 
     errorDiv.appendChild(icon);
     errorDiv.appendChild(text);
+    errorDiv.style.setProperty("--plugin-image-size", `${option.size}px`);
+    errorDiv.style.setProperty("--plugin-image-radius", `${option.radius}px`);
+    if (option.shadow) errorDiv.classList.add("plugin-image-shadow")
+    if (option.border) errorDiv.classList.add("plugin-image-border");
     return errorDiv;
 }
