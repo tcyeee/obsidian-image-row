@@ -6,7 +6,7 @@ import { MarkdownView, MarkdownPostProcessorContext, TFile } from "obsidian";
 export function addImageLayoutMarkdownProcessor(plugin: ImgRowPlugin) {
     plugin.registerMarkdownCodeBlockProcessor("imgs", (source, el, ctx) => {
         const option = parseStyleOptions(source);
-        const container = createContainer(option, plugin, ctx as MarkdownPostProcessorContext, el);
+        const container = createContainer(option, plugin, ctx, el);
 
         const lines = source.split("\n");
         const srcList: string[] = [];
