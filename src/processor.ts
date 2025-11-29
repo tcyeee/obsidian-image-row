@@ -266,6 +266,8 @@ function setupSettingPanel(
             radio.checked = true;
         }
     });
+    const sizeGroupEl = panel.querySelector<HTMLDivElement>(".plugin-image-setting-size-group");
+    if (sizeGroupEl) sizeGroupEl.dataset.size = pickSizeLabel;
 
     // 标记当前面板中的设置是否有尚未写回文件的更改
     let hasPendingChanges = false;
@@ -292,7 +294,12 @@ function setupSettingPanel(
         radio.addEventListener("change", () => {
             if (!radio.checked) return;
             // 给 S / M / L 映射一个具体像素值
-            switch (radio.dataset.size) {
+            const sizeLabel = radio.dataset.size;
+            const sizeGroup = panel.querySelector<HTMLDivElement>(".plugin-image-setting-size-group");
+            if (sizeGroup && sizeLabel) {
+                sizeGroup.dataset.size = sizeLabel;
+            }
+            switch (sizeLabel) {
                 case "small":
                     option.size = 90;
                     option.gap = 5;

@@ -31,24 +31,37 @@ export function createSettingButtonElement(): HTMLButtonElement {
  * 只负责元素创建与基础属性，勾选状态与事件绑定由调用方处理。
  */
 export function createSettingPanelDom(sizeGroupName: string): SettingPanelDom {
-    // 尺寸选项单选
+    // 尺寸选项分组（滑块样式的按钮组）
+    const sizeGroup = document.createElement("div");
+    sizeGroup.className = "plugin-image-setting-size-group";
+    // 默认选中中号，用于初始化滑块位置；实际选中值会在外部根据 SettingOptions 覆盖
+    sizeGroup.dataset.size = "medium";
+
+    // 背景滑块条
+    const slider = document.createElement("div");
+    slider.className = "plugin-image-setting-size-slider";
+    sizeGroup.appendChild(slider);
+
+    // 尺寸选项单选（内部仍然使用 radio，外观是按钮组）
     const createSizeRadio = (sizeKey: "small" | "medium" | "large", labelText: string) => {
         const label = document.createElement("label");
         label.className = "plugin-image-setting-size-radio";
 
         const input = document.createElement("input");
         input.type = "radio";
+        input.className = "plugin-image-setting-size-radio-input";
         input.dataset.size = sizeKey;
         input.name = sizeGroupName;
 
+        const textSpan = document.createElement("span");
+        textSpan.className = "plugin-image-setting-size-radio-text";
+        textSpan.textContent = labelText;
+
         label.appendChild(input);
-        label.appendChild(document.createTextNode(` ${labelText}`));
+        label.appendChild(textSpan);
         return label;
     };
 
-    // 尺寸选项分组
-    const sizeGroup = document.createElement("div");
-    sizeGroup.className = "plugin-image-setting-size-group";
     sizeGroup.appendChild(createSizeRadio("small", "S"));
     sizeGroup.appendChild(createSizeRadio("medium", "M"));
     sizeGroup.appendChild(createSizeRadio("large", "L"));
