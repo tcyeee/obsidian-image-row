@@ -41,9 +41,10 @@ export function addImageLayoutMarkdownProcessor(plugin: ImgRowPlugin) {
                     srcList.push(originalSrc);
 
                     // 缩略图路径（相对于 vault 根目录）
-                    // 例如：THUMBNAIL_PATH=".cache/"，原图为 "assets/1.png"
-                    // 最终缩略图写入路径为 ".cache/1.png"
-                    const thumbPath = normalizePath(config.THUMBNAIL_PATH + file.name);
+                    // 存储时不带任何扩展名：<THUMBNAIL_PATH>/<原图 basename>
+                    // 例如：THUMBNAIL_PATH="assets/cache/"，原图为 "assets/1.png"
+                    // 最终缩略图写入路径为 "assets/cache/1"
+                    const thumbPath = normalizePath(`${config.THUMBNAIL_PATH}${file.basename}`);
                     // 缩略图文件对象
 
                     // 这里拿到的thumbFile是null,thumbPath是.cache/1.png,我检查了在Vault根目录的.cache目录下确实有1.png文件
@@ -240,7 +241,8 @@ async function ensureThumbnailForFile(
         if (!ctx) return;
         ctx.drawImage(loadedImg, sx, sy, cropSize, cropSize, 0, 0, targetSide, targetSide);
 
-        const mimeType = file.extension.toLowerCase() === "png" ? "image/png" : "image/jpeg";
+        // 缩略图统一生成为 JPG 格式
+        const mimeType = "image/jpeg";
         const blob = await new Promise<Blob | null>((resolve) =>
             canvas.toBlob((b) => resolve(b), mimeType, config.THUMBNAIL_QUALITY),
         );
