@@ -128,7 +128,13 @@ export async function ensureThumbnailForFile(plugin: ImgRowPlugin, file: TFile, 
     const image = new Image();
     const loadPromise = new Promise<HTMLImageElement>((resolve, reject) => {
       image.onload = () => resolve(image);
-      image.onerror = (e) => reject(e);
+      image.onerror = (e) => {
+        if (e instanceof ErrorEvent && e.error instanceof Error) {
+          reject(e.error);
+        } else {
+          reject(new Error(`Failed to load image: ${originalSrc}`));
+        }
+      };
     });
     image.src = originalSrc;
 
