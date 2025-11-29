@@ -1,3 +1,4 @@
+import { MarkdownView } from "obsidian";
 import { config } from "./config";
 
 export class SettingOptions {
@@ -27,3 +28,10 @@ export interface SettingPanelDom {
     shadowCheckbox: HTMLInputElement | null;
     sizeRadios: HTMLInputElement[];
 }
+
+
+export type MarkdownViewWithCurrentMode = MarkdownView & {
+    currentMode?: {
+        type: string;
+    };
+};

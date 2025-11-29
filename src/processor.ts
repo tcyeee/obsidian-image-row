@@ -1,16 +1,9 @@
 import ImgRowPlugin from "main";
 import { setCssProps, parseStyleOptions, md5, ensureThumbnailForFile } from "src/utils";
 import { createImageContainerElement, createSettingButtonElement, createSettingPanelDom, createErrorDiv } from "src/ui";
-import { SettingOptions as SettingOptions, SettingPanelDom } from "./domain";
+import { MarkdownViewWithCurrentMode, SettingOptions as SettingOptions, SettingPanelDom } from "./domain";
 import { MarkdownView, MarkdownPostProcessorContext, TFile, normalizePath } from "obsidian";
 import { config } from "./config";
-
-
-type MarkdownViewWithCurrentMode = MarkdownView & {
-    currentMode?: {
-        type: string;
-    };
-};
 
 /**
  * 自动解析imgs代码块
