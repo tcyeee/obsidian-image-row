@@ -3,6 +3,12 @@ import { createErrorDiv } from "src/utils";
 import { SettingOptions as SettingOptions } from "./domain";
 import { MarkdownView, MarkdownPostProcessorContext, TFile } from "obsidian";
 
+type MarkdownViewWithCurrentMode = MarkdownView & {
+    currentMode?: {
+        type: string;
+    };
+};
+
 export function addImageLayoutMarkdownProcessor(plugin: ImgRowPlugin) {
     plugin.registerMarkdownCodeBlockProcessor("imgs", (source, el, ctx) => {
         const option = parseStyleOptions(source);
@@ -15,8 +21,9 @@ export function addImageLayoutMarkdownProcessor(plugin: ImgRowPlugin) {
             if (match) {
                 const linkPath = match[1];
                 const decodedPath = decodeURIComponent(linkPath);
-                let file = plugin.app.metadataCache.getFirstLinkpathDest(decodedPath, ctx.sourcePath)
-                    ?? plugin.app.vault.getFiles().find((f: any) => f.path.endsWith(decodedPath));
+                let file =
+                    plugin.app.metadataCache.getFirstLinkpathDest(decodedPath, ctx.sourcePath) ??
+                    plugin.app.vault.getFiles().find((f: TFile) => f.path.endsWith(decodedPath));
                 if (file) {
                     const src = plugin.app.vault.getResourcePath(file);
                     srcList.push(src);
@@ -245,10 +252,8 @@ function createContainer(
 
     // 仅在阅读模式下启用面板入口
     const view = plugin.app.workspace.getActiveViewOfType(MarkdownView);
-    const mode =
-        (view as any)?.getMode?.() ??
-        (view as any)?.currentMode?.type ??
-        "preview";
+    const legacyView = view as MarkdownViewWithCurrentMode | null;
+    const mode = view?.getMode?.() ?? legacyView?.currentMode?.type ?? "preview";
     const isPreviewMode = mode === "preview";
 
     if (isPreviewMode) {
@@ -266,8 +271,10 @@ function createContainer(
         };
 
         // 点击面板外自动关闭
-        document.addEventListener("click", (e: any) => {
-            if (!container.contains(e.target)) {
+        document.addEventListener("click", (e: MouseEvent) => {
+            const target = e.target;
+            if (!(target instanceof Node)) return;
+            if (!container.contains(target)) {
                 if (panel.style.display !== "none") {
                     persistIfNeeded();
                     panel.style.display = "none";
