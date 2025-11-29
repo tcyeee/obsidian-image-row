@@ -77,20 +77,20 @@ export function parseStyleOptions(source: string): SettingOptions {
 
     switch (key) {
       case "size":
-        const size = parseInt(value);
-        if (!isNaN(size) && size >= 50 && size <= 500) {
+        const size = Number(value);
+        if (!Number.isNaN(size) && size >= 50 && size <= 500) {
           settings.size = size;
         }
         break;
       case "gap":
-        const gap = parseInt(value);
-        if (!isNaN(gap) && gap >= 0 && gap <= 50) {
+        const gap = Number(value);
+        if (!Number.isNaN(gap) && gap >= 0 && gap <= 50) {
           settings.gap = gap;
         }
         break;
       case "radius":
-        const radius = parseInt(value);
-        if (!isNaN(radius) && radius >= 0 && radius <= 50) {
+        const radius = Number(value);
+        if (!Number.isNaN(radius) && radius >= 0 && radius <= 50) {
           settings.radius = radius;
         }
         break;
