@@ -1,5 +1,5 @@
 import ImgRowPlugin from "main";
-import { setCssProps, parseStyleOptions } from "src/utils";
+import { setCssProps, parseStyleOptions, md5 } from "src/utils";
 import { createImageContainerElement, createSettingButtonElement, createSettingPanelDom, createErrorDiv } from "src/ui";
 import { SettingOptions as SettingOptions, SettingPanelDom } from "./domain";
 import { MarkdownView, MarkdownPostProcessorContext, TFile, normalizePath } from "obsidian";
@@ -41,10 +41,12 @@ export function addImageLayoutMarkdownProcessor(plugin: ImgRowPlugin) {
                     srcList.push(originalSrc);
 
                     // 缩略图路径（相对于 vault 根目录）
-                    // 存储时不带任何扩展名：<THUMBNAIL_PATH>/<原图 basename>
+                    // 使用源文件路径的 MD5 作为文件名，且不带扩展名：
+                    // <THUMBNAIL_PATH>/<md5(file.path)>
                     // 例如：THUMBNAIL_PATH="assets/cache/"，原图为 "assets/1.png"
-                    // 最终缩略图写入路径为 "assets/cache/1"
-                    const thumbPath = normalizePath(`${config.THUMBNAIL_PATH}${file.basename}`);
+                    // 最终缩略图写入路径为 "assets/cache/<md5>"
+                    const thumbKey = md5(file.path);
+                    const thumbPath = normalizePath(`${config.THUMBNAIL_PATH}${thumbKey}`);
                     // 缩略图文件对象
 
                     // 这里拿到的thumbFile是null,thumbPath是.cache/1.png,我检查了在Vault根目录的.cache目录下确实有1.png文件
