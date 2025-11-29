@@ -181,16 +181,24 @@ export function createContainer(option: SettingOptions, plugin: ImgRowPlugin, ct
     const isPreviewMode = mode === "preview";
 
     if (isPreviewMode) {
+        const isPanelOpen = () => panel.classList.contains("plugin-image-setting-panel--open");
+        const openPanel = () => {
+            panel.classList.add("plugin-image-setting-panel--open");
+        };
+        const closePanel = () => {
+            if (!isPanelOpen()) return;
+            persistIfNeeded();
+            panel.classList.remove("plugin-image-setting-panel--open");
+        };
+
         // setting按钮点击显示/隐藏面板
         settingBtn.onclick = (e) => {
             e.stopPropagation();
-            const isOpen = panel.style.display !== "none";
+            const isOpen = isPanelOpen();
             if (isOpen) {
-                // 从打开到关闭：统一在此时写回所有更改
-                persistIfNeeded();
-                panel.style.display = "none";
+                closePanel();
             } else {
-                panel.style.display = "block";
+                openPanel();
             }
         };
 
@@ -199,25 +207,19 @@ export function createContainer(option: SettingOptions, plugin: ImgRowPlugin, ct
             const target = e.target;
             if (!(target instanceof Node)) return;
             if (!container.contains(target)) {
-                if (panel.style.display !== "none") {
-                    persistIfNeeded();
-                    panel.style.display = "none";
-                }
+                closePanel();
             }
         });
 
         // 鼠标移入图片容器时显示设置按钮
         container.addEventListener("mouseenter", () => {
-            settingBtn.style.display = "flex";
+            settingBtn.classList.add("plugin-image-setting-btn-container--visible");
         });
 
         // 鼠标移出图片容器时隐藏设置按钮
         container.addEventListener("mouseleave", () => {
-            settingBtn.style.display = "none";
-            if (panel.style.display !== "none") {
-                persistIfNeeded();
-                panel.style.display = "none";
-            }
+            settingBtn.classList.remove("plugin-image-setting-btn-container--visible");
+            closePanel();
         });
     }
 

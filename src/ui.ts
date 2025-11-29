@@ -24,7 +24,6 @@ export function createSettingButtonElement(): HTMLButtonElement {
     settingIcon.setAttribute("aria-hidden", "true");
 
     settingBtn.appendChild(settingIcon);
-    settingBtn.style.display = "none";
 
     return settingBtn;
 }
@@ -36,7 +35,6 @@ export function createSettingButtonElement(): HTMLButtonElement {
 export function createSettingPanelDom(sizeGroupName: string): SettingPanelDom {
     const panel = document.createElement("div");
     panel.className = "plugin-image-setting-panel";
-    panel.style.display = "none";
 
     // 尺寸选项分组
     const sizeGroup = document.createElement("div");

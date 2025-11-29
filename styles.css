@@ -107,16 +107,19 @@
   top: 44px;
   right: 12px;
   min-width: 160px;
+  display: none;
   background: #fff;
   border-radius: 10px;
   box-shadow: 0 6px 24px rgba(0,0,0,0.13);
   padding: 17px 26px 16px 18px;
   z-index: 110;
-  display: none;
   font-size: 15px;
   color: #464646;
   flex-direction: column;
   gap: 18px;
+}
+.plugin-image-setting-panel.plugin-image-setting-panel--open {
+  display: flex;
 }
 .plugin-image-setting-checkbox {
   user-select: none;
@@ -156,15 +159,19 @@
     position: absolute;
     top: 9px;
     right: 35px;
+    display: none;
     color: rgb(97, 97, 97);
     cursor: pointer;
     align-items: center;
     justify-content: center;
     z-index: 10;
 }
+.plugin-image-setting-btn-container.plugin-image-setting-btn-container--visible {
+  display: flex;
+}
 
-/* 鼠标悬停在整个图片容器区域时，显示右上角的 setting 按钮 */
-.plugin-image-container:hover .plugin-image-setting-btn-container{
+/* 鼠标悬停在整个图片容器区域时，给已显示的 setting 按钮添加背景 */
+.plugin-image-container:hover .plugin-image-setting-btn-container.plugin-image-setting-btn-container--visible{
   background: white;
 }
 
