@@ -86,8 +86,6 @@ function createImage(option: SettingOptions, src: string, srcList?: string[], id
     img.classList.add("plugin-image");
     img.style.setProperty("--plugin-image-size", `${option.size}px`);
     img.style.setProperty("--plugin-image-radius", `${option.radius}px`);
-    if (option.shadow) img.classList.add("plugin-image-shadow")
-    if (option.border) img.classList.add("plugin-image-border");
 
     img.addEventListener("click", () => {
         let curIdx = idx || 0;
@@ -355,6 +353,57 @@ function setupSettingPanel(
 }
 
 /**
+ * 获取当前缩略图对应的外层 wrapper（如果存在且为本插件创建的 wrapper）。
+ */
+function getImageWrapper(img: HTMLImageElement): HTMLElement | null {
+    const parent = img.parentElement;
+    if (!(parent instanceof HTMLElement)) return null;
+    return parent.classList.contains("plugin-image-wrapper") ? parent : null;
+}
+
+/**
+ * 同步尺寸 & 圆角到图片及其外层 wrapper。
+ */
+function applySizeAndRadius(
+    img: HTMLImageElement,
+    wrapper: HTMLElement | null,
+    option: SettingOptions,
+): void {
+    img.style.setProperty("--plugin-image-size", `${option.size}px`);
+    img.style.setProperty("--plugin-image-radius", `${option.radius}px`);
+    if (wrapper) {
+        wrapper.style.setProperty("--plugin-image-size", `${option.size}px`);
+        wrapper.style.setProperty("--plugin-image-radius", `${option.radius}px`);
+    }
+}
+
+/**
+ * 将某个视觉样式类（阴影/边框/隐藏）优先作用到 wrapper，
+ * 若不存在 wrapper，则退回到直接作用在图片上。
+ */
+function applyWrapperPreferredClass(
+    img: HTMLImageElement,
+    wrapper: HTMLElement | null,
+    className: string,
+    enabled: boolean,
+): void {
+    const target = wrapper ?? img;
+    if (enabled) {
+        target.classList.add(className);
+        // 保证 class 只挂在一个元素上，避免样式叠加
+        if (wrapper && target === wrapper) {
+            img.classList.remove(className);
+        } else if (wrapper && target === img) {
+            wrapper.classList.remove(className);
+        }
+    } else {
+        target.classList.remove(className);
+        wrapper?.classList.remove(className);
+        img.classList.remove(className);
+    }
+}
+
+/**
  * 将 SettingOptions 应用到某个容器中的所有图片与容器本身。
  * 这样 parseStyleOptions + 设置面板 就形成了统一的数据源。
  * 
@@ -367,44 +416,15 @@ function applySettingsToContainer(container: HTMLDivElement, option: SettingOpti
     // 这里只处理图片组中的缩略图，不包含大图预览；大图预览始终保持原图样式
     const imgs = Array.from(container.querySelectorAll<HTMLImageElement>(".plugin-image"));
     imgs.forEach((img) => {
-        const wrapper = img.parentElement instanceof HTMLElement ? img.parentElement : null;
+        const wrapper = getImageWrapper(img);
 
         // 尺寸 & 圆角（同时作用于图片与外层 wrapper，保证布局和裁剪一致）
-        img.style.setProperty("--plugin-image-size", `${option.size}px`);
-        img.style.setProperty("--plugin-image-radius", `${option.radius}px`);
-        if (wrapper) {
-            wrapper.style.setProperty("--plugin-image-size", `${option.size}px`);
-            wrapper.style.setProperty("--plugin-image-radius", `${option.radius}px`);
-        }
+        applySizeAndRadius(img, wrapper, option);
 
-        // 阴影
-        if (option.shadow) {
-            img.classList.add("plugin-image-shadow");
-        } else {
-            img.classList.remove("plugin-image-shadow");
-        }
-
-        // 边框
-        if (option.border) {
-            img.classList.add("plugin-image-border");
-        } else {
-            img.classList.remove("plugin-image-border");
-        }
-
-        // 隐藏（蒙版/模糊处理）
-        if (option.hidden) {
-            // 优先对外层 wrapper 进行模糊处理，并通过 overflow 裁剪掉溢出的模糊边缘
-            if (wrapper && wrapper.classList.contains("plugin-image-wrapper")) {
-                wrapper.classList.add("plugin-image-hidden");
-            } else {
-                img.classList.add("plugin-image-hidden");
-            }
-        } else {
-            if (wrapper && wrapper.classList.contains("plugin-image-wrapper")) {
-                wrapper.classList.remove("plugin-image-hidden");
-            }
-            img.classList.remove("plugin-image-hidden");
-        }
+        // 阴影 / 边框 / 隐藏：统一用「优先 wrapper」的策略，封装成小工具函数
+        applyWrapperPreferredClass(img, wrapper, "plugin-image-shadow", option.shadow);
+        applyWrapperPreferredClass(img, wrapper, "plugin-image-border", option.border);
+        applyWrapperPreferredClass(img, wrapper, "plugin-image-hidden", option.hidden);
     });
 }
 
