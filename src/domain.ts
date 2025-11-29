@@ -5,3 +5,10 @@ export class SettingOptions {
     shadow: boolean = false;
     border: boolean = false
 }
+
+export interface SettingPanelDom {
+    panel: HTMLDivElement;
+    borderCheckbox: HTMLInputElement | null;
+    shadowCheckbox: HTMLInputElement | null;
+    sizeRadios: HTMLInputElement[];
+}

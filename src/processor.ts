@@ -1,6 +1,7 @@
 import ImgRowPlugin from "main";
-import { createErrorDiv, setCssProps } from "src/utils";
-import { SettingOptions as SettingOptions } from "./domain";
+import { setCssProps, parseStyleOptions } from "src/utils";
+import { createImageContainerElement, createSettingButtonElement, createSettingPanelDom, createErrorDiv } from "src/ui";
+import { SettingOptions as SettingOptions, SettingPanelDom } from "./domain";
 import { MarkdownView, MarkdownPostProcessorContext, TFile } from "obsidian";
 
 type MarkdownViewWithCurrentMode = MarkdownView & {
@@ -9,6 +10,10 @@ type MarkdownViewWithCurrentMode = MarkdownView & {
     };
 };
 
+/**
+ * 自动解析imgs代码块
+ * 当解析到imgs代码块时，会自动创建一个图片容器，并应用对应的配置。
+ */
 export function addImageLayoutMarkdownProcessor(plugin: ImgRowPlugin) {
     plugin.registerMarkdownCodeBlockProcessor("imgs", (source, el, ctx) => {
         const option = parseStyleOptions(source);
@@ -147,20 +152,10 @@ function createContainer(
     ctx: MarkdownPostProcessorContext,
     el: HTMLElement,
 ): HTMLDivElement {
-    const container = document.createElement("div");
-    container.classList.add("plugin-image-container");
-    container.style.setProperty("--plugin-container-gap", `${option.gap}px`);
+    const container = createImageContainerElement(option);
 
     // setting按钮（仅在阅读模式下可见）
-    const settingBtn = document.createElement("button");
-    settingBtn.type = "button";
-    settingBtn.className = "plugin-image-setting-btn-container";
-    settingBtn.setAttribute("aria-label", "setting");
-    const settingIcon = document.createElement("div");
-    settingIcon.className = "plugin-image-setting-btn icon--settings";
-    settingIcon.setAttribute("aria-hidden", "true");
-    settingBtn.appendChild(settingIcon);
-    settingBtn.style.display = "none";
+    const settingBtn = createSettingButtonElement();
     container.appendChild(settingBtn);
 
     // 为每个容器生成独立的 radio 分组名，避免多个代码块之间互相影响
@@ -237,68 +232,13 @@ function setupSettingPanel(
     container: HTMLDivElement,
     sizeGroupName: string,
 ): { panel: HTMLDivElement; persistIfNeeded: () => void } {
-    const panel = document.createElement("div");
-    panel.className = "plugin-image-setting-panel";
-    panel.style.display = "none";
-
-    // 尺寸选项分组
-    const sizeGroup = document.createElement("div");
-    sizeGroup.className = "plugin-image-setting-size-group";
-    sizeGroup.setAttribute("role", "radiogroup");
-    sizeGroup.setAttribute("aria-label", "图片尺寸");
-
-    const createSizeRadio = (sizeKey: "small" | "medium" | "large", labelText: string) => {
-        const label = document.createElement("label");
-        label.className = "plugin-image-setting-size-radio";
-
-        const input = document.createElement("input");
-        input.type = "radio";
-        input.dataset.size = sizeKey;
-        input.name = sizeGroupName;
-        input.setAttribute("aria-label", labelText);
-
-        label.appendChild(input);
-        label.appendChild(document.createTextNode(` ${labelText}`));
-        return label;
-    };
-
-    sizeGroup.appendChild(createSizeRadio("small", "S"));
-    sizeGroup.appendChild(createSizeRadio("medium", "M"));
-    sizeGroup.appendChild(createSizeRadio("large", "L"));
-
-    // checkbox：边框 & 阴影
-    const createSettingCheckbox = (settingKey: "border" | "shadow", text: string) => {
-        const label = document.createElement("label");
-        label.className = "plugin-image-setting-checkbox";
-
-        const input = document.createElement("input");
-        input.type = "checkbox";
-        input.dataset.setting = settingKey;
-        input.setAttribute("aria-label", text);
-
-        label.appendChild(input);
-        label.appendChild(document.createTextNode(` ${text}`));
-        return label;
-    };
-
-    const borderCheckboxLabel = createSettingCheckbox("border", "border");
-    const shadowCheckboxLabel = createSettingCheckbox("shadow", "shadow");
-
-    panel.appendChild(sizeGroup);
-    panel.appendChild(borderCheckboxLabel);
-    panel.appendChild(shadowCheckboxLabel);
+    const { panel, borderCheckbox, shadowCheckbox, sizeRadios }: SettingPanelDom = createSettingPanelDom(sizeGroupName);
 
     container.appendChild(panel);
 
     // 根据当前的配置初始化面板勾选状态
-    const borderCheckbox = panel.querySelector<HTMLInputElement>('input[data-setting="border"]');
-    const shadowCheckbox = panel.querySelector<HTMLInputElement>('input[data-setting="shadow"]');
     if (borderCheckbox) borderCheckbox.checked = option.border;
     if (shadowCheckbox) shadowCheckbox.checked = option.shadow;
-
-    const sizeRadios = Array.from(
-        panel.querySelectorAll<HTMLInputElement>('input[type="radio"][name="' + sizeGroupName + '"]'),
-    );
     // 根据当前 size 推断 S / M / L
     const currentSize = option.size;
     const pickSizeLabel = currentSize <= 90 ? "small" : currentSize <= 150 ? "medium" : "large";
@@ -476,44 +416,4 @@ function buildStyleLineFromOptions(option: SettingOptions): string {
     return parts.join("&");
 }
 
-function parseStyleOptions(source: string): SettingOptions {
-    const settings = new SettingOptions();
-    if (!source.includes(";;")) return settings;
-
-    const parts = source.split(";;").map(part => part.trim());
-    const styleLines = parts[0].split("&");
-
-    for (const line of styleLines) {
-        const [key, value] = line.split("=").map(s => s.trim());
-        if (!key || value === undefined) continue;
-
-        switch (key) {
-            case "size":
-                const size = parseInt(value);
-                if (!isNaN(size) && size >= 50 && size <= 500) {
-                    settings.size = size;
-                }
-                break;
-            case "gap":
-                const gap = parseInt(value);
-                if (!isNaN(gap) && gap >= 0 && gap <= 50) {
-                    settings.gap = gap;
-                }
-                break;
-            case "radius":
-                const radius = parseInt(value);
-                if (!isNaN(radius) && radius >= 0 && radius <= 50) {
-                    settings.radius = radius;
-                }
-                break;
-            case "shadow":
-                settings.shadow = value.toLowerCase() === "true";
-                break;
-            case "border":
-                settings.border = value.toLowerCase() === "true";
-                break;
-        }
-    }
-    return settings;
-}
 

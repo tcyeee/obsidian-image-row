@@ -1,37 +1,12 @@
 import { Plugin } from "obsidian";
 import { addImageLayoutMarkdownProcessor } from "./src/processor";
-import { imgsWrapper, getImageSyntaxes, hasMarkdownImage } from "./src/utils";
+import { registerEditorMenu } from "./src/register";
 
 export default class ImgRowPlugin extends Plugin {
 	onload() {
+		// 自动解析imgs代码块
 		addImageLayoutMarkdownProcessor(this);
-		// 在编辑器（源模式 / 实时预览）的右键菜单中追加一项： 当光标所在行包含 Markdown 图片语法时（![](...) 或 ![[]]），认为用户右键了图片附近
-		this.registerEvent(
-			this.app.workspace.on("editor-menu", (menu, editor) => {
-				const cursor = editor.getCursor();
-				const line = editor.getLine(cursor.line) ?? "";
-
-				// 如果当前行不包含图片语法，则直接返回
-				if (!hasMarkdownImage(line)) return;
-
-				// 拿到其中代表图片的 Markdown 语法
-				const imageSyntax = getImageSyntaxes(line);
-				menu.addItem((item) => {
-					item
-						.setIcon("image")
-						.setTitle("Wrap the images into a group")
-						.onClick(() => {
-							const wrappedImageSyntax = imgsWrapper(imageSyntax);
-							// 使用生成的 ```imgs 代码块替换当前行的图片语法
-							const lineNo = cursor.line;
-							editor.replaceRange(
-								wrappedImageSyntax,
-								{ line: lineNo, ch: 0 },
-								{ line: lineNo, ch: line.length },
-							);
-						});
-				});
-			}),
-		);
+		// 注册针对图片的右键菜单
+		registerEditorMenu(this);
 	}
 }

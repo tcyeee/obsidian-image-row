@@ -1,25 +1,6 @@
 import { SettingOptions } from "./domain";
 
-/* create error notice */
-export function createErrorDiv(option: SettingOptions): HTMLDivElement {
-  const errorDiv = document.createElement("div");
-  errorDiv.classList.add("plugin-image-error");
 
-  const icon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-  icon.setAttribute("width", "20");
-  icon.setAttribute("height", "20");
-  icon.setAttribute("viewBox", "0 0 24 24");
-  icon.innerHTML = `
-      <rect width="24" height="24" fill="none"/><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="m2 2l20 20M10.41 10.41a2 2 0 1 1-2.83-2.83m5.92 5.92L6 21m12-9l3 3"/><path d="M3.59 3.59A2 2 0 0 0 3 5v14a2 2 0 0 0 2 2h14c.55 0 1.052-.22 1.41-.59M21 15V5a2 2 0 0 0-2-2H9"/></g>
-    `;
-
-  const text = document.createElement("span");
-  text.textContent = "404";
-
-  errorDiv.appendChild(icon);
-  errorDiv.appendChild(text);
-  return errorDiv;
-}
 
 /**
  * 将单行图片语法包装成 ```imgs 代码块。
@@ -70,4 +51,56 @@ export function setCssProps(el: HTMLElement, props: Record<string, string>): voi
   Object.entries(props).forEach(([key, value]) => {
     el.style.setProperty(key, value);
   });
+}
+
+/**
+ * 解析代码块内部的配置行
+ * @param source - 代码块内容
+ * 
+ * 配置行格式：
+ *   size=220&gap=10&radius=10&shadow=false&border=false;;
+ *   ![img](...)
+ * 
+ * 返回配置对象：
+ *   { size: 220, gap: 10, radius: 10, shadow: false, border: false }
+ */
+export function parseStyleOptions(source: string): SettingOptions {
+  const settings = new SettingOptions();
+  if (!source.includes(";;")) return settings;
+
+  const parts = source.split(";;").map(part => part.trim());
+  const styleLines = parts[0].split("&");
+
+  for (const line of styleLines) {
+    const [key, value] = line.split("=").map(s => s.trim());
+    if (!key || value === undefined) continue;
+
+    switch (key) {
+      case "size":
+        const size = parseInt(value);
+        if (!isNaN(size) && size >= 50 && size <= 500) {
+          settings.size = size;
+        }
+        break;
+      case "gap":
+        const gap = parseInt(value);
+        if (!isNaN(gap) && gap >= 0 && gap <= 50) {
+          settings.gap = gap;
+        }
+        break;
+      case "radius":
+        const radius = parseInt(value);
+        if (!isNaN(radius) && radius >= 0 && radius <= 50) {
+          settings.radius = radius;
+        }
+        break;
+      case "shadow":
+        settings.shadow = value.toLowerCase() === "true";
+        break;
+      case "border":
+        settings.border = value.toLowerCase() === "true";
+        break;
+    }
+  }
+  return settings;
 }
