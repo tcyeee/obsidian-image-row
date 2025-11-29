@@ -153,38 +153,141 @@ function createContainer(
 
     // setting按钮（仅在阅读模式下可见）
     const settingBtn = document.createElement("button");
+    settingBtn.type = "button";
     settingBtn.className = "plugin-image-setting-btn-container";
-    settingBtn.innerHTML = `<div class="plugin-image-setting-btn icon--settings">`;
+    settingBtn.setAttribute("aria-label", "setting");
+    const settingIcon = document.createElement("div");
+    settingIcon.className = "plugin-image-setting-btn icon--settings";
+    settingIcon.setAttribute("aria-hidden", "true");
+    settingBtn.appendChild(settingIcon);
     settingBtn.style.display = "none";
     container.appendChild(settingBtn);
 
     // 为每个容器生成独立的 radio 分组名，避免多个代码块之间互相影响
     const sizeGroupName = `imgs-size-${Math.random().toString(36).slice(2, 8)}`;
 
-    // setting面板
+    // setting 面板及其交互逻辑
+    const { panel, persistIfNeeded } = setupSettingPanel(
+        option,
+        plugin,
+        ctx,
+        el,
+        container,
+        sizeGroupName,
+    );
+
+    // 仅在阅读模式下启用面板入口
+    const view = plugin.app.workspace.getActiveViewOfType(MarkdownView);
+    const legacyView = view as MarkdownViewWithCurrentMode | null;
+    const mode = view?.getMode?.() ?? legacyView?.currentMode?.type ?? "preview";
+    const isPreviewMode = mode === "preview";
+
+    if (isPreviewMode) {
+        // setting按钮点击显示/隐藏面板
+        settingBtn.onclick = (e) => {
+            e.stopPropagation();
+            const isOpen = panel.style.display !== "none";
+            if (isOpen) {
+                // 从打开到关闭：统一在此时写回所有更改
+                persistIfNeeded();
+                panel.style.display = "none";
+            } else {
+                panel.style.display = "block";
+            }
+        };
+
+        // 点击面板外自动关闭
+        document.addEventListener("click", (e: MouseEvent) => {
+            const target = e.target;
+            if (!(target instanceof Node)) return;
+            if (!container.contains(target)) {
+                if (panel.style.display !== "none") {
+                    persistIfNeeded();
+                    panel.style.display = "none";
+                }
+            }
+        });
+
+        container.addEventListener("mouseenter", () => {
+            settingBtn.style.display = "flex";
+        });
+        container.addEventListener("mouseleave", () => {
+            settingBtn.style.display = "none";
+            if (panel.style.display !== "none") {
+                persistIfNeeded();
+                panel.style.display = "none";
+            }
+        });
+    }
+
+    return container;
+}
+
+/**
+ * 创建并初始化 setting 面板，包括：
+ * - DOM 结构（尺寸单选 + 边框/阴影勾选）
+ * - 根据当前配置设置初始勾选状态
+ * - 绑定变更事件并在需要时触发持久化
+ */
+function setupSettingPanel(
+    option: SettingOptions,
+    plugin: ImgRowPlugin,
+    ctx: MarkdownPostProcessorContext,
+    el: HTMLElement,
+    container: HTMLDivElement,
+    sizeGroupName: string,
+): { panel: HTMLDivElement; persistIfNeeded: () => void } {
     const panel = document.createElement("div");
     panel.className = "plugin-image-setting-panel";
     panel.style.display = "none";
-    panel.innerHTML = `
-      <div class="plugin-image-setting-size-group">
-        <label class="plugin-image-setting-size-radio">
-          <input type="radio" data-size="small" name="${sizeGroupName}" /> S
-        </label>
-        <label class="plugin-image-setting-size-radio">
-          <input type="radio" data-size="medium" name="${sizeGroupName}" /> M
-        </label>
-        <label class="plugin-image-setting-size-radio">
-          <input type="radio" data-size="large" name="${sizeGroupName}" /> L
-        </label>
-      </div>
-      <label class="plugin-image-setting-checkbox">
-        <input type="checkbox" data-setting="border"/> border
-      </label>
-      <label class="plugin-image-setting-checkbox">
-        <input type="checkbox" data-setting="shadow"/> shadow
-      </label>
 
-    `;
+    // 尺寸选项分组
+    const sizeGroup = document.createElement("div");
+    sizeGroup.className = "plugin-image-setting-size-group";
+    sizeGroup.setAttribute("role", "radiogroup");
+    sizeGroup.setAttribute("aria-label", "图片尺寸");
+
+    const createSizeRadio = (sizeKey: "small" | "medium" | "large", labelText: string) => {
+        const label = document.createElement("label");
+        label.className = "plugin-image-setting-size-radio";
+
+        const input = document.createElement("input");
+        input.type = "radio";
+        input.dataset.size = sizeKey;
+        input.name = sizeGroupName;
+        input.setAttribute("aria-label", labelText);
+
+        label.appendChild(input);
+        label.appendChild(document.createTextNode(` ${labelText}`));
+        return label;
+    };
+
+    sizeGroup.appendChild(createSizeRadio("small", "S"));
+    sizeGroup.appendChild(createSizeRadio("medium", "M"));
+    sizeGroup.appendChild(createSizeRadio("large", "L"));
+
+    // checkbox：边框 & 阴影
+    const createSettingCheckbox = (settingKey: "border" | "shadow", text: string) => {
+        const label = document.createElement("label");
+        label.className = "plugin-image-setting-checkbox";
+
+        const input = document.createElement("input");
+        input.type = "checkbox";
+        input.dataset.setting = settingKey;
+        input.setAttribute("aria-label", text);
+
+        label.appendChild(input);
+        label.appendChild(document.createTextNode(` ${text}`));
+        return label;
+    };
+
+    const borderCheckboxLabel = createSettingCheckbox("border", "border");
+    const shadowCheckboxLabel = createSettingCheckbox("shadow", "shadow");
+
+    panel.appendChild(sizeGroup);
+    panel.appendChild(borderCheckboxLabel);
+    panel.appendChild(shadowCheckboxLabel);
+
     container.appendChild(panel);
 
     // 根据当前的配置初始化面板勾选状态
@@ -194,7 +297,7 @@ function createContainer(
     if (shadowCheckbox) shadowCheckbox.checked = option.shadow;
 
     const sizeRadios = Array.from(
-        panel.querySelectorAll<HTMLInputElement>('input[type="radio"][name="' + sizeGroupName + '"]')
+        panel.querySelectorAll<HTMLInputElement>('input[type="radio"][name="' + sizeGroupName + '"]'),
     );
     // 根据当前 size 推断 S / M / L
     const currentSize = option.size;
@@ -249,51 +352,7 @@ function createContainer(
         });
     });
 
-    // 仅在阅读模式下启用面板入口
-    const view = plugin.app.workspace.getActiveViewOfType(MarkdownView);
-    const legacyView = view as MarkdownViewWithCurrentMode | null;
-    const mode = view?.getMode?.() ?? legacyView?.currentMode?.type ?? "preview";
-    const isPreviewMode = mode === "preview";
-
-    if (isPreviewMode) {
-        // setting按钮点击显示/隐藏面板
-        settingBtn.onclick = (e) => {
-            e.stopPropagation();
-            const isOpen = panel.style.display !== "none";
-            if (isOpen) {
-                // 从打开到关闭：统一在此时写回所有更改
-                persistIfNeeded();
-                panel.style.display = "none";
-            } else {
-                panel.style.display = "block";
-            }
-        };
-
-        // 点击面板外自动关闭
-        document.addEventListener("click", (e: MouseEvent) => {
-            const target = e.target;
-            if (!(target instanceof Node)) return;
-            if (!container.contains(target)) {
-                if (panel.style.display !== "none") {
-                    persistIfNeeded();
-                    panel.style.display = "none";
-                }
-            }
-        });
-
-        container.addEventListener("mouseenter", () => {
-            settingBtn.style.display = "flex";
-        });
-        container.addEventListener("mouseleave", () => {
-            settingBtn.style.display = "none";
-            if (panel.style.display !== "none") {
-                persistIfNeeded();
-                panel.style.display = "none";
-            }
-        });
-    }
-
-    return container;
+    return { panel, persistIfNeeded };
 }
 
 /**
