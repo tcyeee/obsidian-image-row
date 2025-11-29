@@ -3,6 +3,7 @@ import { setCssProps, parseStyleOptions } from "src/utils";
 import { createImageContainerElement, createSettingButtonElement, createSettingPanelDom, createErrorDiv } from "src/ui";
 import { SettingOptions as SettingOptions, SettingPanelDom } from "./domain";
 import { MarkdownView, MarkdownPostProcessorContext, TFile } from "obsidian";
+import { config } from "./config";
 
 type MarkdownViewWithCurrentMode = MarkdownView & {
     currentMode?: {
@@ -301,16 +302,19 @@ function setupSettingPanel(
             }
             switch (sizeLabel) {
                 case "small":
-                    option.size = 90;
-                    option.gap = 5;
+                    option.size = config.SIZE_SMALL;
+                    option.gap = config.GAP_SMALL;
+                    option.radius = config.RADIUS_SMALL;
                     break;
                 case "medium":
-                    option.size = 150;
-                    option.gap = 8;
+                    option.size = config.SIZE_MEDIUM;
+                    option.gap = config.GAP_MEDIUM;
+                    option.radius = config.RADIUS_MEDIUM;
                     break;
                 case "large":
-                    option.size = 220;
-                    option.gap = 10;
+                    option.size = config.SIZE_LARGE;
+                    option.gap = config.GAP_LARGE;
+                    option.radius = config.RADIUS_LARGE;
                     break;
             }
             applySettingsToContainer(container, option);
