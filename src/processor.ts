@@ -33,7 +33,9 @@ export function addImageLayoutMarkdownProcessor(plugin: ImgRowPlugin) {
                     const src = plugin.app.vault.getResourcePath(file);
                     srcList.push(src);
                 } else {
-                    container.appendChild(createErrorDiv(option));
+                    // 如果图片不存在，则显示错误提示
+                    const errorDiv = createErrorDiv(option);
+                    container.appendChild(errorDiv);
                 }
             }
         }
