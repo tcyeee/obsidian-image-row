@@ -1,9 +1,9 @@
 export const config = {
-    DEFAULT_SIZE: 160,      // 默认图片大小
-    DEFAULT_GAP: 10,        // 默认图片间距
-    DEFAULT_RADIUS: 10,     // 默认图片圆角
+    DEFAULT_SIZE: 150,     // 默认图片大小
+    DEFAULT_GAP: 8,        // 默认图片间距
+    DEFAULT_RADIUS: 8,     // 默认图片圆角
     DEFAULT_SHADOW: true,  // 默认显示阴影
-    DEFAULT_BORDER: false,  // 默认不显示边框
+    DEFAULT_BORDER: false, // 默认不显示边框
 
     /* SMALL */
     SMALL_SIZE: 90,
