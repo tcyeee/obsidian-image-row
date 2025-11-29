@@ -48,6 +48,15 @@ export function addImageLayoutMarkdownProcessor(plugin: ImgRowPlugin) {
     });
 }
 
+/**
+ * 创建图片组中的单个图片元素，并应用对应的配置。
+ * 
+ * @param option - 配置对象
+ * @param src - 图片源
+ * @param srcList - 图片列表
+ * @param idx - 图片索引
+ * @returns 图片元素
+ */
 function createImage(option: SettingOptions, src: string, srcList?: string[], idx?: number): HTMLImageElement {
     const img = document.createElement("img");
     img.src = src;
@@ -145,13 +154,14 @@ function createImage(option: SettingOptions, src: string, srcList?: string[], id
 /**
  * 创建图片容器及右上角的设置面板。
  * 面板中的控件会和传入的 SettingOptions 进行绑定，并在修改时写回到 Markdown 源码。
+ * 
+ * @param option - 配置对象
+ * @param plugin - 插件实例
+ * @param ctx - 上下文
+ * @param el - 元素
+ * @returns 图片容器
  */
-function createContainer(
-    option: SettingOptions,
-    plugin: ImgRowPlugin,
-    ctx: MarkdownPostProcessorContext,
-    el: HTMLElement,
-): HTMLDivElement {
+export function createContainer(option: SettingOptions, plugin: ImgRowPlugin, ctx: MarkdownPostProcessorContext, el: HTMLElement): HTMLDivElement {
     const container = createImageContainerElement(option);
 
     // setting按钮（仅在阅读模式下可见）
@@ -162,14 +172,7 @@ function createContainer(
     const sizeGroupName = `imgs-size-${Math.random().toString(36).slice(2, 8)}`;
 
     // setting 面板及其交互逻辑
-    const { panel, persistIfNeeded } = setupSettingPanel(
-        option,
-        plugin,
-        ctx,
-        el,
-        container,
-        sizeGroupName,
-    );
+    const { panel, persistIfNeeded } = setupSettingPanel(option, plugin, ctx, el, container, sizeGroupName,);
 
     // 仅在阅读模式下启用面板入口
     const view = plugin.app.workspace.getActiveViewOfType(MarkdownView);
@@ -203,9 +206,12 @@ function createContainer(
             }
         });
 
+        // 鼠标移入图片容器时显示设置按钮
         container.addEventListener("mouseenter", () => {
             settingBtn.style.display = "flex";
         });
+
+        // 鼠标移出图片容器时隐藏设置按钮
         container.addEventListener("mouseleave", () => {
             settingBtn.style.display = "none";
             if (panel.style.display !== "none") {
@@ -223,6 +229,17 @@ function createContainer(
  * - DOM 结构（尺寸单选 + 边框/阴影勾选）
  * - 根据当前配置设置初始勾选状态
  * - 绑定变更事件并在需要时触发持久化
+ * 
+ * @param option - 配置对象
+ * @param plugin - 插件实例
+ * @param ctx - 上下文
+ * @param el - 元素
+ * @param container - 图片容器
+ * @param sizeGroupName - 尺寸单选组名
+ * @returns 设置面板
+ *   { panel: HTMLDivElement; persistIfNeeded: () => void }
+ *     panel: 设置面板
+ *     persistIfNeeded: 持久化函数 （在需要时将更改写回到对应 Markdown 文件）
  */
 function setupSettingPanel(
     option: SettingOptions,
@@ -298,6 +315,9 @@ function setupSettingPanel(
 /**
  * 将 SettingOptions 应用到某个容器中的所有图片与容器本身。
  * 这样 parseStyleOptions + 设置面板 就形成了统一的数据源。
+ * 
+ * @param container - 图片容器
+ * @param option - 配置对象
  */
 function applySettingsToContainer(container: HTMLDivElement, option: SettingOptions) {
     container.style.setProperty("--plugin-container-gap", `${option.gap}px`);
@@ -335,13 +355,14 @@ function applySettingsToContainer(container: HTMLDivElement, option: SettingOpti
  * 注意：
  * - 之前用 editor.replaceRange 在某些情况下（多窗口 / 预览模式等）会出现「逻辑上写入成功但在 Obsidian 里看不到」的问题。
  * - 这里改为直接基于 Vault 文件内容进行修改，再整体写回，保证预览和编辑视图都能正确刷新。
+ * 
+ * @param option - 配置对象
+ * @param plugin - 插件实例
+ * @param ctx - 上下文
+ * @param el - 元素
+ * @returns 持久化函数
  */
-async function persistOptionsToSource(
-    option: SettingOptions,
-    plugin: ImgRowPlugin,
-    ctx: MarkdownPostProcessorContext,
-    el: HTMLElement,
-) {
+async function persistOptionsToSource(option: SettingOptions, plugin: ImgRowPlugin, ctx: MarkdownPostProcessorContext, el: HTMLElement): Promise<void> {
     const section = ctx.getSectionInfo(el);
     if (!section) return;
 
@@ -360,9 +381,7 @@ async function persistOptionsToSource(
     const innerStart = section.lineStart + 1;
     const innerEnd = section.lineEnd;
 
-    if (innerStart >= innerEnd || innerStart < 0 || innerEnd > lines.length) {
-        return;
-    }
+    if (innerStart >= innerEnd || innerStart < 0 || innerEnd > lines.length) return;
 
     const currentInner = lines.slice(innerStart, innerEnd).join("\n");
     const newInner = buildInnerSourceFromOptions(option, currentInner);
@@ -385,35 +404,33 @@ async function persistOptionsToSource(
 /**
  * 根据当前配置构造（或更新）代码块内部的文本内容。
  * 会保留原有的图片 Markdown，只替换/添加配置行。
+ * 
+ * @param option - 配置对象
+ * @param currentInner - 代码块内部内容
+ * @returns 构造后的代码块内部内容
  */
 function buildInnerSourceFromOptions(option: SettingOptions, currentInner: string): string {
-    const styleLine = buildStyleLineFromOptions(option);
+    const styleLine = option.buildStyleLineConfig();
+    const endSign = ";;";
 
-    if (!currentInner.includes(";;")) {
-        // 原来没有任何配置，直接在最前面插入一行配置
+    // 原来没有任何配置，直接在最前面插入一行配置
+    if (!currentInner.includes(endSign)) {
         const trimmed = currentInner.replace(/^\s*/, "");
-        return `${styleLine};;\n${trimmed}`;
+        return `${styleLine}${endSign}\n${trimmed}`;
     }
 
-    const idx = currentInner.indexOf(";;");
-    const after = currentInner.slice(idx + 3); // 去掉 ';;'
-    // 去掉 ';;' 后面紧跟的空白和换行，保留图片等内容
+    // 原来有配置，则删掉原有配置，写入新的配置
+    const idx = currentInner.indexOf(endSign);
+    if (idx === -1) {
+        // 理论上不会走到这里，兜底按「无配置」处理
+        const trimmed = currentInner.replace(/^\s*/, "");
+        return `${styleLine}${endSign}\n${trimmed}`;
+    }
+
+    // 去掉旧配置与分隔符，仅保留之后的图片等内容
+    const after = currentInner.slice(idx + endSign.length);
     const imagesPart = after.replace(/^[ \t\r\n]*/, "");
-
-    return `${styleLine};;\n${imagesPart}`;
-}
-
-/**
- * 将 SettingOptions 转为配置行字符串，供 parseStyleOptions 使用。
- */
-function buildStyleLineFromOptions(option: SettingOptions): string {
-    const parts: string[] = [];
-    parts.push(`size=${option.size}`);
-    parts.push(`gap=${option.gap}`);
-    parts.push(`radius=${option.radius}`);
-    parts.push(`shadow=${option.shadow}`);
-    parts.push(`border=${option.border}`);
-    return parts.join("&");
+    return `${styleLine}${endSign}\n${imagesPart}`;
 }
 
 
