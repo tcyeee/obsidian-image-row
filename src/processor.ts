@@ -31,18 +31,16 @@ export function addImageLayoutMarkdownProcessor(plugin: ImgRowPlugin) {
                     plugin.app.vault.getFiles().find((f: TFile) => f.path.endsWith(decodedPath));
                 if (file) {
                     const src = plugin.app.vault.getResourcePath(file);
+                    const imgIdx = srcList.length;
                     srcList.push(src);
+                    const imgEl = createImage(option, src, srcList, imgIdx);
+                    container.appendChild(imgEl);
                 } else {
-                    // 如果图片不存在，则显示错误提示
-                    const errorDiv = createErrorDiv(option);
-                    container.appendChild(errorDiv);
+                    // 如果图片不存在，则在对应位置插入错误图标
+                    container.appendChild(createErrorDiv(option));
                 }
             }
         }
-        srcList.forEach((src, idx) => {
-            container.appendChild(createImage(option, src, srcList, idx));
-        });
-
         // 将当前配置应用到容器中的所有图片（支持后续面板动态更新）
         applySettingsToContainer(container, option);
 
