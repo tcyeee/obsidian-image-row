@@ -302,19 +302,19 @@ function setupSettingPanel(
             }
             switch (sizeLabel) {
                 case "small":
-                    option.size = config.SIZE_SMALL;
-                    option.gap = config.GAP_SMALL;
-                    option.radius = config.RADIUS_SMALL;
+                    option.size = config.SMALL_SIZE;
+                    option.gap = config.SMALL_GAP;
+                    option.radius = config.SMALL_RADIUS;
                     break;
                 case "medium":
-                    option.size = config.SIZE_MEDIUM;
-                    option.gap = config.GAP_MEDIUM;
-                    option.radius = config.RADIUS_MEDIUM;
+                    option.size = config.MEDIUM_SIZE;
+                    option.gap = config.MEDIUM_GAP;
+                    option.radius = config.MEDIUM_RADIUS;
                     break;
                 case "large":
-                    option.size = config.SIZE_LARGE;
-                    option.gap = config.GAP_LARGE;
-                    option.radius = config.RADIUS_LARGE;
+                    option.size = config.LARGE_SIZE;
+                    option.gap = config.LARGE_GAP;
+                    option.radius = config.LARGE_RADIUS;
                     break;
             }
             applySettingsToContainer(container, option);
