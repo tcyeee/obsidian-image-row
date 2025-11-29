@@ -122,16 +122,18 @@
   display: flex;
 }
 .plugin-image-setting-checkbox {
+  margin-top: -10px;
   user-select: none;
-  font-size: 15px;
+  font-size: 14px;
   color: #575757;
   display: flex;
   align-items: center;
+  line-height: 1.1;
 }
 .plugin-image-setting-panel input[type="checkbox"] {
   margin-right: 9px;
   accent-color: #888;
-  transform: scale(1.1);
+  transform: scale(1.0);
 }
 .plugin-image-setting-size-group {
   display: flex;
