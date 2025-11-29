@@ -62,3 +62,12 @@ export function getImageSyntaxes(line: string): string {
 export function hasMarkdownImage(line: string): boolean {
   return /!\[.*?\]\((.*?)\)/.test(line) || /!\[\[.*?\]\]/.test(line);
 }
+
+/**
+ * 统一修改元素的内联样式属性，方便以后替换为 CSS 变量或其他方案。
+ */
+export function setCssProps(el: HTMLElement, props: Record<string, string>): void {
+  Object.entries(props).forEach(([key, value]) => {
+    el.style.setProperty(key, value);
+  });
+}

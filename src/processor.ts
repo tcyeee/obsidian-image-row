@@ -1,5 +1,5 @@
 import ImgRowPlugin from "main";
-import { createErrorDiv } from "src/utils";
+import { createErrorDiv, setCssProps } from "src/utils";
 import { SettingOptions as SettingOptions } from "./domain";
 import { MarkdownView, MarkdownPostProcessorContext, TFile } from "obsidian";
 
@@ -70,7 +70,6 @@ function createImage(option: SettingOptions, src: string, srcList?: string[], id
         let scale = 1;
         const minScale = 1.0;
         const maxScale = 2.5;
-        largeImg.style.transition = "transform 0.2s";
         largeImg.addEventListener("wheel", e => {
             e.preventDefault();
             const delta = e.deltaY;
@@ -79,7 +78,7 @@ function createImage(option: SettingOptions, src: string, srcList?: string[], id
             } else {
                 scale = Math.max(minScale, scale - 0.1);
             }
-            largeImg.style.transform = `scale(${scale})`;
+            setCssProps(largeImg, { transform: `scale(${scale})` });
         });
         // 切换图片函数
         const switchTo = (newIdx: number) => {
@@ -87,7 +86,7 @@ function createImage(option: SettingOptions, src: string, srcList?: string[], id
             curIdx = newIdx;
             largeImg.src = srcList[curIdx];
             scale = 1;
-            largeImg.style.transform = "scale(1)";
+            setCssProps(largeImg, { transform: "scale(1)" });
             updateBtnState();
         };
         prevBtn.onclick = () => {

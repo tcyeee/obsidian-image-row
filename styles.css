@@ -86,6 +86,7 @@
 	max-height: 90%;
 	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
     border-radius: var(--plugin-image-radius, 10px);
+    transition: transform 0.2s;
 }
 
 .plugin-image-border-large {
