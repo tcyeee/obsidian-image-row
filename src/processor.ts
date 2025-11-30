@@ -461,12 +461,24 @@ function applyLimitRows(container: HTMLDivElement, option: SettingOptions): void
         return;
     }
 
-    // 开启限制：等待一帧，让浏览器先完成布局，再根据 offsetTop 实际分行
+    // 开启限制：等待一帧，让浏览器先完成布局，再根据 offsetTop 实际分行。
+    // 如果此时容器宽度为 0（例如笔记面板还在布局中），使用 LIMIT_DELAY / LIMIT_MAX_RETRY 做有限次重试，
+    // 避免「首次打开页面时不生效，只有手动再勾一次 limit 才生效」的问题。
+    let retryCount = 0;
+
     const runLimit = () => {
         const items = Array.from(
             container.querySelectorAll<HTMLElement>(".plugin-image-wrapper, .plugin-image-error"),
         );
         if (items.length === 0) return;
+
+        // 如果容器还没有正确布局（宽度为 0），稍后重试一次
+        if (container.offsetWidth === 0 && retryCount < config.LIMIT_MAX_RETRY) {
+            retryCount++;
+            setTimeout(runLimit, config.LIMIT_DELAY);
+            return;
+        }
+
         /**
          * 使用 offsetTop 实际分行：
          * - 遍历所有元素，按 offsetTop 变化分成多行
@@ -530,7 +542,7 @@ function applyLimitRows(container: HTMLDivElement, option: SettingOptions): void
                 mask.className = "plugin-image-more-mask";
                 const text = document.createElement("span");
                 text.className = "plugin-image-more-text";
-                text.textContent = `+${remainingCount}`;
+                text.textContent = `+ ${remainingCount}`;
                 mask.appendChild(text);
 
                 // 点击蒙版：关闭 limit（等价于勾掉 setting 面板中的 limit 复选框）
@@ -552,6 +564,7 @@ function applyLimitRows(container: HTMLDivElement, option: SettingOptions): void
         });
     };
 
+    // 首次调用仍然放在 requestAnimationFrame 中，避免同步强制布局
     requestAnimationFrame(runLimit);
 }
 

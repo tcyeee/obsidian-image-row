@@ -124,6 +124,7 @@
 }
 
 .plugin-image-more-mask {
+  pointer-events: all !important ;
   position: absolute;
   inset: 0;
   display: flex;
@@ -140,9 +141,10 @@
 
 .plugin-image-more-text {
   padding: 4px 10px;
-  border-radius: 999px;
-  background: rgba(0, 0, 0, 0.55);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+  font-size: 20px;
+  /* border-radius: 999px; */
+  /* background: rgba(0, 0, 0, 0.55); */
+  /* box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35); */
 }
 
 .plugin-image-container {
