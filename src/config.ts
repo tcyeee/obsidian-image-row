@@ -5,6 +5,7 @@ export const config = {
     DEFAULT_SHADOW: false, // 默认是否阴影
     DEFAULT_BORDER: false, // 默认是否边框
     DEFAULT_HIDDEN: false, // 默认是否隐藏图片
+    DEFAULT_LIMIT: false,  // 默认是否限制为 3 行
 
     /* SMALL */
     SMALL_SIZE: 90,

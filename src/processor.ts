@@ -273,7 +273,7 @@ function setupSettingPanel(
     container: HTMLDivElement,
     sizeGroupName: string,
 ): { panel: HTMLDivElement; persistIfNeeded: () => void } {
-    const { panel, borderCheckbox, shadowCheckbox, hiddenCheckbox, sizeRadios }: SettingPanelDom = createSettingPanelDom(sizeGroupName);
+    const { panel, borderCheckbox, shadowCheckbox, hiddenCheckbox, limitCheckbox, sizeRadios }: SettingPanelDom = createSettingPanelDom(sizeGroupName);
 
     container.appendChild(panel);
 
@@ -281,6 +281,7 @@ function setupSettingPanel(
     if (borderCheckbox) borderCheckbox.checked = option.border;
     if (shadowCheckbox) shadowCheckbox.checked = option.shadow;
     if (hiddenCheckbox) hiddenCheckbox.checked = option.hidden;
+    if (limitCheckbox) limitCheckbox.checked = option.limit;
     // 根据当前 size 推断 S / M / L
     const currentSize = option.size;
     const pickSizeLabel = currentSize <= 90 ? "small" : currentSize <= 150 ? "medium" : "large";
@@ -315,6 +316,11 @@ function setupSettingPanel(
     });
     hiddenCheckbox?.addEventListener("change", () => {
         option.hidden = !!hiddenCheckbox.checked;
+        applySettingsToContainer(container, option);
+        hasPendingChanges = true;
+    });
+    limitCheckbox?.addEventListener("change", () => {
+        option.limit = !!limitCheckbox.checked;
         applySettingsToContainer(container, option);
         hasPendingChanges = true;
     });
@@ -426,6 +432,49 @@ function applySettingsToContainer(container: HTMLDivElement, option: SettingOpti
         applyWrapperPreferredClass(img, wrapper, "plugin-image-border", option.border);
         applyWrapperPreferredClass(img, wrapper, "plugin-image-hidden", option.hidden);
     });
+
+    // 根据 limit 选项，决定是否只显示前三行图片
+    applyLimitRows(container, option);
+}
+
+/**
+ * 根据当前容器的布局，仅保留前三行图片（按 offsetTop 分组判断行）。
+ * 当 option.limit 为 false 时，恢复所有被隐藏的元素。
+ */
+function applyLimitRows(container: HTMLDivElement, option: SettingOptions): void {
+    const items = Array.from(
+        container.querySelectorAll<HTMLElement>(".plugin-image-wrapper, .plugin-image-error"),
+    );
+
+    // 先清除之前可能设置过的 display 样式
+    items.forEach((el) => {
+        if (!option.limit) {
+            // 完全关闭限制时，恢复为默认显示
+            el.style.removeProperty("display");
+        }
+    });
+
+    if (!option.limit) return;
+
+    if (items.length === 0) return;
+
+    let currentTop: number | null = null;
+    let rowIndex = -1;
+    const maxRows = 3;
+
+    for (const el of items) {
+        const top = el.offsetTop;
+        if (currentTop === null || Math.abs(top - currentTop) > 1) {
+            rowIndex += 1;
+            currentTop = top;
+        }
+
+        if (rowIndex >= maxRows) {
+            el.style.display = "none";
+        } else {
+            el.style.removeProperty("display");
+        }
+    }
 }
 
 /**
