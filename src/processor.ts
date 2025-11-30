@@ -64,10 +64,10 @@ export function addImageLayoutMarkdownProcessor(plugin: ImgRowPlugin) {
                 }
             }
         }
+        // 先挂载到文档，再应用配置（包括 limit 逻辑），避免初次渲染时拿不到正确宽度
+        el.appendChild(container);
         // 将当前配置应用到容器中的所有图片（支持后续面板动态更新）
         applySettingsToContainer(container, option);
-
-        el.appendChild(container);
     });
 }
 
@@ -463,33 +463,34 @@ function applyLimitRows(container: HTMLDivElement, option: SettingOptions): void
         return;
     }
 
-    // 开启限制：下一帧中根据实际布局计算行数
-    requestAnimationFrame(() => {
+    // 开启限制：等待一帧，让浏览器先完成布局，再根据 offsetTop 实际分行
+    const runLimit = () => {
         const items = Array.from(
             container.querySelectorAll<HTMLElement>(".plugin-image-wrapper, .plugin-image-error"),
         );
         if (items.length === 0) return;
+        /**
+         * 使用 offsetTop 实际分行：
+         * - 遍历所有元素，按 offsetTop 变化分成多行
+         * - 前 MAX_VISIBLE_ROWS 行保留，其余行隐藏
+         * - 最后一格替换为 "+N" 蒙版
+         */
+        const rows: HTMLElement[][] = [];
+        let currentTop: number | null = null;
 
-        // 容器宽度（内容区宽度即可）
-        const containerWidth = container.clientWidth || container.getBoundingClientRect().width;
-        if (!containerWidth) return;
+        for (const el of items) {
+            const top = el.offsetTop;
+            if (currentTop === null || Math.abs(top - currentTop) > 1) {
+                currentTop = top;
+                rows.push([]);
+            }
+            rows[rows.length - 1].push(el);
+        }
 
-        // 取第一张图片（或错误块）的实际宽度
-        const first = items[0];
-        const itemRect = first.getBoundingClientRect();
-        const itemWidth = itemRect.width || option.size;
+        const maxRows = config.MAX_VISIBLE_ROWS;
 
-        // 使用配置中的 gap 近似当前 gap（与 CSS 变量一致）
-        const gap = option.gap;
-
-        // 每行最多可以放多少张：容器宽度中容纳 (itemWidth + gap) 的个数
-        const perRow = Math.max(1, Math.floor((containerWidth + gap) / (itemWidth + gap)));
-
-        // 仅保留前三行
-        const maxVisible = perRow * config.MAX_VISIBLE_ROWS;
-
-        // 如果总数不足 3 行，直接全部展示，不需要 +N 蒙版
-        if (items.length <= maxVisible) {
+        // 不足 maxRows 行：全部显示，不加蒙版
+        if (rows.length <= maxRows) {
             items.forEach((el) => {
                 el.style.removeProperty("display");
                 const oldMask = el.querySelector<HTMLDivElement>(".plugin-image-more-mask");
@@ -506,17 +507,23 @@ function applyLimitRows(container: HTMLDivElement, option: SettingOptions): void
             el.classList.remove("plugin-image-more-wrapper");
         });
 
-        // 最后一张用来显示 "+N" 蒙版，其余多余图片隐藏
-        const overlayIndex = Math.max(0, maxVisible - 1);
-        const visibleOriginalCount = overlayIndex; // 0 ~ overlayIndex-1 为原图
+        // 前 maxRows 行中的最后一个元素作为 "+N" 容器
+        const visibleRows = rows.slice(0, maxRows);
+        const flattenedVisible = visibleRows.flat();
+        const overlayEl = flattenedVisible[flattenedVisible.length - 1];
+
+        // 0 ~ (flattenedVisible.length - 2) 是真实显示的原图
+        const visibleOriginalSet = new Set(flattenedVisible.slice(0, -1));
+
         const totalCount = items.length;
+        const visibleOriginalCount = visibleOriginalSet.size;
         const remainingCount = totalCount - visibleOriginalCount;
 
-        items.forEach((el, index) => {
-            if (index < overlayIndex) {
-                // 正常显示的图片
+        items.forEach((el) => {
+            if (visibleOriginalSet.has(el)) {
+                // 在前三行内、且不是最后一个格子的原图
                 el.style.removeProperty("display");
-            } else if (index === overlayIndex) {
+            } else if (el === overlayEl) {
                 // 带 "+N" 的蒙版图片
                 el.style.removeProperty("display");
                 el.classList.add("plugin-image-more-wrapper");
@@ -533,12 +540,9 @@ function applyLimitRows(container: HTMLDivElement, option: SettingOptions): void
                     event.stopPropagation();
                     event.preventDefault();
                     const limitInput = container.querySelector<HTMLInputElement>('input[data-setting="limit"]');
-                    if (limitInput) {
-                        if (limitInput.checked) {
-                            limitInput.checked = false;
-                            // 触发原有的 change 逻辑（会更新 option.limit 并重新应用设置）
-                            limitInput.dispatchEvent(new Event("change", { bubbles: true }));
-                        }
+                    if (limitInput && limitInput.checked) {
+                        limitInput.checked = false;
+                        limitInput.dispatchEvent(new Event("change", { bubbles: true }));
                     }
                 });
 
@@ -548,7 +552,9 @@ function applyLimitRows(container: HTMLDivElement, option: SettingOptions): void
                 el.style.display = "none";
             }
         });
-    });
+    };
+
+    requestAnimationFrame(runLimit);
 }
 
 /**
