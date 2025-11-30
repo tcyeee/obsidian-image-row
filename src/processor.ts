@@ -67,7 +67,11 @@ export function addImageLayoutMarkdownProcessor(plugin: ImgRowPlugin) {
         // 先挂载到文档，再应用配置（包括 limit 逻辑），避免初次渲染时拿不到正确宽度
         el.appendChild(container);
         // 将当前配置应用到容器中的所有图片（支持后续面板动态更新）
-        applySettingsToContainer(container, option);
+        // 这里传入一个简单的「立即持久化」回调，供后续点击「+N」蒙版时使用：
+        // 当用户通过点击蒙版关闭 limit 限制时，会调用该回调把最新配置写回到代码块配置行。
+        applySettingsToContainer(container, option, () => {
+            void persistOptionsToSource(option, plugin, ctx, el);
+        });
     });
 }
 
@@ -294,7 +298,7 @@ function setupSettingPanel(
     // 标记当前面板中的设置是否有尚未写回文件的更改
     let hasPendingChanges = false;
 
-    // 在需要时将更改写回到对应 Markdown 文件
+    // 在需要时将更改写回到对应 Markdown 文件（例如关闭面板时）
     const persistIfNeeded = () => {
         if (!hasPendingChanges) return;
         hasPendingChanges = false;
@@ -319,7 +323,12 @@ function setupSettingPanel(
     });
     limitCheckbox?.addEventListener("change", () => {
         option.limit = !!limitCheckbox.checked;
-        applySettingsToContainer(container, option);
+        // 应用到当前容器，同时为「+N」蒙版提供一个简单的持久化回调：
+        // 当用户点击蒙版关闭 limit 时，会调用该回调，把最新配置写回到代码块配置行。
+        applySettingsToContainer(container, option, () => {
+            void persistOptionsToSource(option, plugin, ctx, el);
+        });
+        // 对于通过设置面板主动修改 limit 的场景，仍然沿用「关闭面板时统一写回」的逻辑。
         hasPendingChanges = true;
     });
     sizeRadios.forEach((radio) => {
@@ -413,8 +422,10 @@ function applyWrapperPreferredClass(
  * 
  * @param container - 图片容器
  * @param option - 配置对象
+ * @param onLimitTogglePersist - 当 limit 状态被代码触发变更时（例如点击「+N」蒙版取消限制）
+ *                               需要立刻持久化配置行时调用的回调（可选）
  */
-function applySettingsToContainer(container: HTMLDivElement, option: SettingOptions) {
+function applySettingsToContainer(container: HTMLDivElement, option: SettingOptions, onLimitTogglePersist?: () => void) {
     container.style.setProperty("--plugin-container-gap", `${option.gap}px`);
 
     // 这里只处理图片组中的缩略图，不包含大图预览；大图预览始终保持原图样式
@@ -432,7 +443,7 @@ function applySettingsToContainer(container: HTMLDivElement, option: SettingOpti
     });
 
     // 根据 limit 选项，决定是否只显示前三行图片
-    applyLimitRows(container, option);
+    applyLimitRows(container, option, onLimitTogglePersist);
 }
 
 /**
@@ -446,7 +457,7 @@ function applySettingsToContainer(container: HTMLDivElement, option: SettingOpti
  * - 最多显示 3 行
  * - 若还有剩余图片，则最后一张显示为「+N」的灰色蒙版，点击后等同于关闭 limit。
  */
-function applyLimitRows(container: HTMLDivElement, option: SettingOptions): void {
+function applyLimitRows(container: HTMLDivElement, option: SettingOptions, onLimitTogglePersist?: () => void): void {
     if (!option.limit) {
         // 关闭限制：立刻恢复所有元素显示
         const allItems = Array.from(
@@ -545,7 +556,7 @@ function applyLimitRows(container: HTMLDivElement, option: SettingOptions): void
                 text.textContent = `+ ${remainingCount}`;
                 mask.appendChild(text);
 
-                // 点击蒙版：关闭 limit（等价于勾掉 setting 面板中的 limit 复选框）
+                // 点击蒙版：关闭 limit（等价于勾掉 setting 面板中的 limit 复选框），并在需要时立刻持久化。
                 mask.addEventListener("click", (event) => {
                     event.stopPropagation();
                     event.preventDefault();
@@ -554,6 +565,9 @@ function applyLimitRows(container: HTMLDivElement, option: SettingOptions): void
                         limitInput.checked = false;
                         limitInput.dispatchEvent(new Event("change", { bubbles: true }));
                     }
+                    // 如果调用方提供了持久化回调（例如设置面板内），这里主动触发一次；
+                    // 对于没有配置持久化回调的场景（纯预览、不需要写回的情况），则不会有任何副作用。
+                    if (onLimitTogglePersist) onLimitTogglePersist();
                 });
 
                 el.appendChild(mask);
