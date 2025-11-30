@@ -440,41 +440,54 @@ function applySettingsToContainer(container: HTMLDivElement, option: SettingOpti
 /**
  * 根据当前容器的布局，仅保留前三行图片（按 offsetTop 分组判断行）。
  * 当 option.limit 为 false 时，恢复所有被隐藏的元素。
+ *
+ * 由于初次渲染时 container 还未插入文档，这里用 requestAnimationFrame
+ * 等待浏览器完成布局后，再根据「容器宽度 / (图片宽度 + gap)」计算每行可容纳数量，
+ * 最终只保留前 3 行的元素。
  */
 function applyLimitRows(container: HTMLDivElement, option: SettingOptions): void {
-    const items = Array.from(
-        container.querySelectorAll<HTMLElement>(".plugin-image-wrapper, .plugin-image-error"),
-    );
-
-    // 先清除之前可能设置过的 display 样式
-    items.forEach((el) => {
-        if (!option.limit) {
-            // 完全关闭限制时，恢复为默认显示
-            el.style.removeProperty("display");
-        }
-    });
-
-    if (!option.limit) return;
-
-    if (items.length === 0) return;
-
-    let currentTop: number | null = null;
-    let rowIndex = -1;
-    const maxRows = 3;
-
-    for (const el of items) {
-        const top = el.offsetTop;
-        if (currentTop === null || Math.abs(top - currentTop) > 1) {
-            rowIndex += 1;
-            currentTop = top;
-        }
-
-        if (rowIndex >= maxRows) {
-            el.style.display = "none";
-        } else {
-            el.style.removeProperty("display");
-        }
+    if (!option.limit) {
+        // 关闭限制：立刻恢复所有元素显示
+        const allItems = Array.from(
+            container.querySelectorAll<HTMLElement>(".plugin-image-wrapper, .plugin-image-error"),
+        );
+        allItems.forEach((el) => el.style.removeProperty("display"));
+        return;
     }
+
+    // 开启限制：下一帧中根据实际布局计算行数
+    requestAnimationFrame(() => {
+        const items = Array.from(
+            container.querySelectorAll<HTMLElement>(".plugin-image-wrapper, .plugin-image-error"),
+        );
+        if (items.length === 0) return;
+
+        // 容器宽度（内容区宽度即可）
+        const containerWidth = container.clientWidth || container.getBoundingClientRect().width;
+        if (!containerWidth) return;
+
+        // 取第一张图片（或错误块）的实际宽度
+        const first = items[0];
+        const itemRect = first.getBoundingClientRect();
+        const itemWidth = itemRect.width || option.size;
+
+        // 使用配置中的 gap 近似当前 gap（与 CSS 变量一致）
+        const gap = option.gap;
+
+        // 每行最多可以放多少张：容器宽度中容纳 (itemWidth + gap) 的个数
+        const perRow = Math.max(1, Math.floor((containerWidth + gap) / (itemWidth + gap)));
+
+        // 仅保留前三行
+        const maxVisible = perRow * 3;
+
+        items.forEach((el, index) => {
+            if (index >= maxVisible) {
+                el.style.display = "none";
+            } else {
+                el.style.removeProperty("display");
+            }
+        });
+    });
 }
 
 /**
