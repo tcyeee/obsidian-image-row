@@ -28,4 +28,5 @@ export const config = {
     THUMBNAIL_PATH: "assets/cache/",
     THUMBNAIL_QUALITY: 0.8, // 缩略图质量
     THUMBNAIL_SIZE: 220,    // 缩略图尺寸
+    MAX_VISIBLE_ROWS: 3,    // 最多显示 3 行
 };

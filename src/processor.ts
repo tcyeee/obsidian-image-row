@@ -284,7 +284,7 @@ function setupSettingPanel(
     if (limitCheckbox) limitCheckbox.checked = option.limit;
     // 根据当前 size 推断 S / M / L
     const currentSize = option.size;
-    const pickSizeLabel = currentSize <= 90 ? "small" : currentSize <= 150 ? "medium" : "large";
+    const pickSizeLabel = currentSize <= config.SMALL_SIZE ? "small" : currentSize <= config.MEDIUM_SIZE ? "medium" : "large";
     sizeRadios.forEach((radio) => {
         if (radio.dataset.size === pickSizeLabel) {
             radio.checked = true;
@@ -486,7 +486,7 @@ function applyLimitRows(container: HTMLDivElement, option: SettingOptions): void
         const perRow = Math.max(1, Math.floor((containerWidth + gap) / (itemWidth + gap)));
 
         // 仅保留前三行
-        const maxVisible = perRow * 3;
+        const maxVisible = perRow * config.MAX_VISIBLE_ROWS;
 
         // 如果总数不足 3 行，直接全部展示，不需要 +N 蒙版
         if (items.length <= maxVisible) {
