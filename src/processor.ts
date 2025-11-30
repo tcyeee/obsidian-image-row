@@ -438,12 +438,15 @@ function applySettingsToContainer(container: HTMLDivElement, option: SettingOpti
 }
 
 /**
- * 根据当前容器的布局，仅保留前三行图片（按 offsetTop 分组判断行）。
+ * 根据当前容器的宽度 / 图片宽度 / gap，仅保留前三行图片。
  * 当 option.limit 为 false 时，恢复所有被隐藏的元素。
  *
  * 由于初次渲染时 container 还未插入文档，这里用 requestAnimationFrame
- * 等待浏览器完成布局后，再根据「容器宽度 / (图片宽度 + gap)」计算每行可容纳数量，
- * 最终只保留前 3 行的元素。
+ * 等待浏览器完成布局后，再根据「容器宽度 / (图片宽度 + gap)」计算每行可容纳数量。
+ *
+ * 限制开启时：
+ * - 最多显示 3 行
+ * - 若还有剩余图片，则最后一张显示为「+N」的灰色蒙版，点击后等同于关闭 limit。
  */
 function applyLimitRows(container: HTMLDivElement, option: SettingOptions): void {
     if (!option.limit) {
@@ -451,7 +454,12 @@ function applyLimitRows(container: HTMLDivElement, option: SettingOptions): void
         const allItems = Array.from(
             container.querySelectorAll<HTMLElement>(".plugin-image-wrapper, .plugin-image-error"),
         );
-        allItems.forEach((el) => el.style.removeProperty("display"));
+        allItems.forEach((el) => {
+            el.style.removeProperty("display");
+            const mask = el.querySelector<HTMLDivElement>(".plugin-image-more-mask");
+            if (mask) mask.remove();
+            el.classList.remove("plugin-image-more-wrapper");
+        });
         return;
     }
 
@@ -480,11 +488,64 @@ function applyLimitRows(container: HTMLDivElement, option: SettingOptions): void
         // 仅保留前三行
         const maxVisible = perRow * 3;
 
-        items.forEach((el, index) => {
-            if (index >= maxVisible) {
-                el.style.display = "none";
-            } else {
+        // 如果总数不足 3 行，直接全部展示，不需要 +N 蒙版
+        if (items.length <= maxVisible) {
+            items.forEach((el) => {
                 el.style.removeProperty("display");
+                const oldMask = el.querySelector<HTMLDivElement>(".plugin-image-more-mask");
+                if (oldMask) oldMask.remove();
+                el.classList.remove("plugin-image-more-wrapper");
+            });
+            return;
+        }
+
+        // 预清理：移除之前的蒙版
+        items.forEach((el) => {
+            const oldMask = el.querySelector<HTMLDivElement>(".plugin-image-more-mask");
+            if (oldMask) oldMask.remove();
+            el.classList.remove("plugin-image-more-wrapper");
+        });
+
+        // 最后一张用来显示 "+N" 蒙版，其余多余图片隐藏
+        const overlayIndex = Math.max(0, maxVisible - 1);
+        const visibleOriginalCount = overlayIndex; // 0 ~ overlayIndex-1 为原图
+        const totalCount = items.length;
+        const remainingCount = totalCount - visibleOriginalCount;
+
+        items.forEach((el, index) => {
+            if (index < overlayIndex) {
+                // 正常显示的图片
+                el.style.removeProperty("display");
+            } else if (index === overlayIndex) {
+                // 带 "+N" 的蒙版图片
+                el.style.removeProperty("display");
+                el.classList.add("plugin-image-more-wrapper");
+
+                const mask = document.createElement("div");
+                mask.className = "plugin-image-more-mask";
+                const text = document.createElement("span");
+                text.className = "plugin-image-more-text";
+                text.textContent = `+${remainingCount}`;
+                mask.appendChild(text);
+
+                // 点击蒙版：关闭 limit（等价于勾掉 setting 面板中的 limit 复选框）
+                mask.addEventListener("click", (event) => {
+                    event.stopPropagation();
+                    event.preventDefault();
+                    const limitInput = container.querySelector<HTMLInputElement>('input[data-setting="limit"]');
+                    if (limitInput) {
+                        if (limitInput.checked) {
+                            limitInput.checked = false;
+                            // 触发原有的 change 逻辑（会更新 option.limit 并重新应用设置）
+                            limitInput.dispatchEvent(new Event("change", { bubbles: true }));
+                        }
+                    }
+                });
+
+                el.appendChild(mask);
+            } else {
+                // 超出前三行 + 1 个蒙版的全部隐藏
+                el.style.display = "none";
             }
         });
     });
