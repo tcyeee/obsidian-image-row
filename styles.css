@@ -53,6 +53,11 @@
   background-color: rgba(0, 0, 0, 0.3);
 }
 
+/* 当图片被标记为 hidden 时，彻底禁止点击，避免触发大图预览 */
+.plugin-image-wrapper.plugin-image-hidden {
+  pointer-events: none;
+}
+
 .plugin-image-overlay {
 	position: fixed;
 	top: 0; 
