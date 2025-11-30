@@ -123,6 +123,10 @@
   position: relative;
 }
 
+.plugin-image-row-hidden {
+  display: none !important;
+}
+
 .plugin-image-more-mask {
   pointer-events: all !important ;
   position: absolute;

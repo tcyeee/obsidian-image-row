@@ -513,7 +513,8 @@ function applyLimitRows(container: HTMLDivElement, option: SettingOptions, onLim
         // 不足 maxRows 行：全部显示，不加蒙版
         if (rows.length <= maxRows) {
             items.forEach((el) => {
-                el.style.removeProperty("display");
+                // 恢复正常显示状态：移除「隐藏行」和蒙版相关的样式
+                el.classList.remove("plugin-image-row-hidden");
                 const oldMask = el.querySelector<HTMLDivElement>(".plugin-image-more-mask");
                 if (oldMask) oldMask.remove();
                 el.classList.remove("plugin-image-more-wrapper");
@@ -526,6 +527,7 @@ function applyLimitRows(container: HTMLDivElement, option: SettingOptions, onLim
             const oldMask = el.querySelector<HTMLDivElement>(".plugin-image-more-mask");
             if (oldMask) oldMask.remove();
             el.classList.remove("plugin-image-more-wrapper");
+            el.classList.remove("plugin-image-row-hidden");
         });
 
         // 前 maxRows 行中的最后一个元素作为 "+N" 容器
@@ -543,10 +545,10 @@ function applyLimitRows(container: HTMLDivElement, option: SettingOptions, onLim
         items.forEach((el) => {
             if (visibleOriginalSet.has(el)) {
                 // 在前三行内、且不是最后一个格子的原图
-                el.style.removeProperty("display");
+                el.classList.remove("plugin-image-row-hidden");
             } else if (el === overlayEl) {
                 // 带 "+N" 的蒙版图片
-                el.style.removeProperty("display");
+                el.classList.remove("plugin-image-row-hidden");
                 el.classList.add("plugin-image-more-wrapper");
 
                 const mask = document.createElement("div");
@@ -572,8 +574,8 @@ function applyLimitRows(container: HTMLDivElement, option: SettingOptions, onLim
 
                 el.appendChild(mask);
             } else {
-                // 超出前三行 + 1 个蒙版的全部隐藏
-                el.style.display = "none";
+                // 超出前三行 + 1 个蒙版的全部隐藏：通过 CSS class 控制 display
+                el.classList.add("plugin-image-row-hidden");
             }
         });
     };
