@@ -46,10 +46,11 @@
 .plugin-image.plugin-image-hidden::after {
   content: "";
   position: absolute;
+  pointer-events: none;
+  user-select: none;
   inset: 0;
   backdrop-filter: blur(50px);
   background-color: rgba(0, 0, 0, 0.3);
-  pointer-events: none;
 }
 
 .plugin-image-overlay {
@@ -69,22 +70,22 @@
 	position: fixed;
 }
 .plugin-image-nav-btn {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-	background-color:rgba(255, 255, 255, 0.8);
-    border: none;
-    font-size: 24px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    z-index: 10001;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.16);
-    transition: background 0.15s, color 0.15s;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background-color:rgba(255, 255, 255, 0.8);
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10001;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.16);
+  transition: background 0.15s, color 0.15s;
 }
 .plugin-image-nav-btn:active {
     background: rgba(255,255,255,0.7);
@@ -105,8 +106,8 @@
 	max-width: 90%;
 	max-height: 90%;
 	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
-    border-radius: var(--plugin-image-radius, 10px);
-    transition: transform 0.2s;
+  border-radius: var(--plugin-image-radius, 10px);
+  transition: transform 0.2s;
 }
 
 .plugin-image-border-large {
@@ -143,8 +144,8 @@
 	display: flex;
 	flex-wrap: wrap;
 	padding: 8px 0;
-    gap: var(--plugin-container-gap, 10px);
-    position: relative; /* 保证setting按钮绝对定位参照容器 */
+  gap: var(--plugin-container-gap, 10px);
+  position: relative; /* 保证setting按钮绝对定位参照容器 */
 }
 
 /* setting操作面板，仅样式 */

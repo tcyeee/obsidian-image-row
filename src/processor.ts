@@ -103,15 +103,13 @@ function createImage(option: SettingOptions, src: string, srcList?: string[], id
         nextBtn.className = "plugin-image-nav-btn plugin-image-nav-btn-next";
 
         let scale = 1;
-        const minScale = 1.0;
-        const maxScale = 2.5;
         largeImg.addEventListener("wheel", e => {
             e.preventDefault();
             const delta = e.deltaY;
             if (delta < 0) {
-                scale = Math.min(maxScale, scale + 0.1);
+                scale = Math.min(config.PREVIEW_MAX_SCALE, scale + 0.1);
             } else {
-                scale = Math.max(minScale, scale - 0.1);
+                scale = Math.max(config.PREVIEW_MIN_SCALE, scale - 0.1);
             }
             setCssProps(largeImg, { transform: `scale(${scale})` });
         });

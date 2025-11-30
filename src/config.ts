@@ -29,4 +29,11 @@ export const config = {
     THUMBNAIL_QUALITY: 0.8, // 缩略图质量
     THUMBNAIL_SIZE: 220,    // 缩略图尺寸
     MAX_VISIBLE_ROWS: 3,    // 最多显示 3 行
+
+    /* LIMIT */
+    LIMIT_DELAY: 500,    // 限制延迟时间
+    LIMIT_MAX_RETRY: 5,  // 限制最大重试次数
+
+    PREVIEW_MIN_SCALE: 1.0, // 预览最小缩放比例
+    PREVIEW_MAX_SCALE: 2.5, // 预览最大缩放比例
 };
